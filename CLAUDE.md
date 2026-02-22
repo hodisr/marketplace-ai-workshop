@@ -70,6 +70,9 @@ cd frontend && npm install && npm run dev
 - Imports always at the top of files, never inside functions
 - `.js` extensions in TypeScript imports (NodeNext module resolution)
 - Tests co-located in `src/__tests__/` directories (backend) or `__tests__/` (frontend)
+- No ORM — raw SQL with the `pg` (node-postgres) library
+- Vitest for all tests (backend + frontend)
+- Test-first development: write tests before implementation
 
 ## API Contracts
 
@@ -97,18 +100,18 @@ GET  /api/sellers/:id                 → SellerProfile (404: { detail: "Seller 
 
 ## AI Development Workflow
 
-This project uses a two-file system for AI-assisted feature development. The workflow files are in `.cursor/rules/` but the process works with any AI coding assistant.
+This project uses a two-file system for AI-assisted feature development. The workflow is available as Claude Code slash commands (`.claude/commands/`) and Cursor rules (`.cursor/rules/`).
 
-### Step 1: Create PRD (`create-prd`)
+### Step 1: Create PRD
 
-Trigger the `create-prd` workflow to generate a Product Requirements Document. The AI will:
+In Claude Code, run `/create-prd`. In Cursor, invoke the `create-prd` rule. The AI will:
 1. Ask 6 clarifying questions about the feature
 2. Generate a structured PRD with 9 sections (Overview, Goals, User Stories, Technical Requirements, API Contracts, Data Models, Edge Cases, Success Metrics, Out of Scope)
 3. Save to `tasks/prd-[feature-name].md`
 
-### Step 2: Generate Tasks (`generate-tasks`)
+### Step 2: Generate Tasks
 
-Trigger the `generate-tasks` workflow with the PRD as input. The AI will:
+In Claude Code, run `/generate-tasks` with the PRD path. In Cursor, invoke the `generate-tasks` rule. The AI will:
 1. **Phase 1**: Generate 3-5 parent tasks (numbered 0.0-5.0) — then STOP
 2. You review and say "Go"
 3. **Phase 2**: Expand each parent into 2-6 subtasks with Type, Dependencies, Files, Description, and Acceptance Criteria
@@ -119,4 +122,9 @@ Trigger the `generate-tasks` workflow with the PRD as input. The AI will:
 Work through the task list in order, checking off each subtask. Each subtask should:
 - Be completable in one AI session
 - Address one concern (a model OR an endpoint OR a component)
-- Include tests as part of the implementation
+- Include tests as part of the implementation (test-first)
+
+After implementing a task, run code quality plugins before committing:
+- `code-simplifier` — simplifies and refines code for clarity
+- `silent-failure-hunter` — identifies silent failures and inadequate error handling
+- `code-reviewer` — reviews code for adherence to project guidelines

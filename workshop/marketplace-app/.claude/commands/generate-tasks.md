@@ -1,9 +1,3 @@
----
-description: Break down a PRD into an executable task list with checkbox tracking. Two-phase: parent tasks first, then subtasks after user says "Go".
-globs:
-alwaysApply: false
----
-
 # Generate Task List
 
 You are a senior engineer breaking down a PRD into executable tasks for a marketplace platform.

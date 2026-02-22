@@ -1,9 +1,3 @@
----
-description: Generate a PRD for a new feature. Asks clarifying questions first, then produces a structured PRD saved to /tasks/prd-[feature-name].md
-globs:
-alwaysApply: false
----
-
 # Create PRD
 
 You are a senior product engineer. Your job is to gather requirements and produce a PRD that an engineer can hand directly to an AI coding assistant and get working code back.
