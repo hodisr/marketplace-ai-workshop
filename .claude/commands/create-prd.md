@@ -24,6 +24,24 @@ All generated PRDs must reflect these project conventions in their Technical Req
 - Vitest for all tests (backend + frontend)
 - Test-first development: every requirement must be testable, tests written before implementation
 
+## Step 0: Explore the Codebase
+
+Before asking questions or writing anything, explore the existing codebase to understand what's already built. Use Glob and Read to examine:
+
+1. **Frontend pages**: `Glob("frontend/pages/**/*.vue")` — what pages exist? What routes does the user see?
+2. **Frontend components**: `Glob("frontend/components/**/*.vue")` — what reusable UI exists? (product cards, headers, forms)
+3. **Frontend composables**: `Glob("frontend/composables/**/*.ts")` — what shared state/logic exists?
+4. **Backend routes**: `Glob("backend/*/src/routes/**/*.ts")` — what API endpoints are already implemented?
+5. **Backend types**: Read `backend/*/src/types.ts` — what data models exist?
+6. **Database schema**: Read `backend/*/src/database.ts` — what tables and schemas exist?
+
+Read the key files (not just list them). Understand:
+- What UI components exist that the new feature must integrate with (e.g., product cards need an "Add to Cart" button, header needs a cart badge)
+- What API endpoints exist that the new feature depends on or extends
+- What data models exist that the new feature references
+
+**Use this context throughout the PRD.** Every integration point with existing UI must be explicit. If the feature needs a button on an existing page, the PRD must say which page, which component, and where on the page.
+
 ## Step 1: Ask Clarifying Questions
 
 Before writing anything, use the `AskUserQuestion` tool to ask clarifying questions. Ask up to 4 questions at a time (the tool's limit). Each question should have 2-4 options with clear labels and descriptions.
