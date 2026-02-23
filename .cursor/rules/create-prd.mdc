@@ -85,6 +85,12 @@ Acceptance: [specific testable condition]
 ### 4. Technical Requirements
 Split into backend (Express.js), frontend (Nuxt 3), and infrastructure subsections.
 
+Each subsection must include a **Testing Strategy** that specifies:
+- **Integration tests** (real HTTP via `supertest`): any endpoint that handles file uploads, file downloads, multipart requests, or crosses a service boundary. These tests must NOT mock the middleware (e.g. multer) — they send real requests and assert real responses including headers.
+- **Unit tests** (mocked dependencies): business logic, validation, data transformation. Mock only the database layer (`pg` pool), not HTTP middleware.
+- **Frontend tests**: mock only the API response (not `$fetch` itself). For file interactions (upload, download), assert that the correct `FormData` field names, content types, and headers are used. For UI state, verify loading/error/success states render correctly.
+- **What NOT to mock**: explicitly list integrations that must be tested with real requests. If the feature involves file I/O, binary responses, multipart uploads, or specific HTTP headers — those must be integration-tested, not mocked away.
+
 ### 5. API Contracts
 Every new/modified endpoint with request/response shapes and error responses.
 
