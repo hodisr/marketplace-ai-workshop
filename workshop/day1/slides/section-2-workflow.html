@@ -1,0 +1,2278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Section 2 — The AI Dev Tasks Workflow | AI Development Workshop</title>
+
+  <!-- Fontshare: Clash Display + Satoshi -->
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400;500;600;700&f[]=satoshi@400;500;700&display=swap">
+
+  <style>
+    /* =========================================================
+       CSS Custom Properties — Shared theme tokens
+       ========================================================= */
+    :root {
+      /* Palette */
+      --bg-primary: #0a0f1c;
+      --bg-secondary: #111827;
+      --accent: #00e5a0;
+      --accent-glow: rgba(0, 229, 160, 0.3);
+      --accent-dim: rgba(0, 229, 160, 0.12);
+      --text-primary: #ffffff;
+      --text-secondary: #9ca3af;
+      --red-tint: #ff6b6b;
+      --red-bg: rgba(255, 107, 107, 0.08);
+      --yellow-tint: #fbbf24;
+      --yellow-bg: rgba(251, 191, 36, 0.08);
+      --green-tint: #00e5a0;
+      --green-bg: rgba(0, 229, 160, 0.08);
+      --blue-tint: #60a5fa;
+      --blue-bg: rgba(96, 165, 250, 0.08);
+      --purple-tint: #a78bfa;
+      --purple-bg: rgba(167, 139, 250, 0.08);
+
+      /* Typography */
+      --font-heading: 'Clash Display', sans-serif;
+      --font-body: 'Satoshi', sans-serif;
+
+      /* Spacing */
+      --slide-padding: 80px;
+
+      /* Animation */
+      --reveal-duration: 0.7s;
+      --reveal-stagger: 0.12s;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* =========================================================
+       Reset & Base
+       ========================================================= */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Subtle grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* =========================================================
+       Progress Bar (top)
+       ========================================================= */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+      z-index: 1000;
+      transition: width 0.35s var(--ease-out);
+      width: 0%;
+    }
+
+    /* =========================================================
+       Navigation Dots (right side)
+       ========================================================= */
+    .nav-dots {
+      position: fixed;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 1000;
+    }
+
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out);
+      position: relative;
+    }
+
+    .nav-dot:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.3);
+    }
+
+    .nav-dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      transform: scale(1.2);
+    }
+
+    /* Tooltip on hover */
+    .nav-dot::after {
+      content: attr(data-label);
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-family: var(--font-body);
+      padding: 4px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .nav-dot:hover::after {
+      opacity: 1;
+    }
+
+    /* =========================================================
+       Slide Base
+       ========================================================= */
+    .slide {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--slide-padding);
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-inner {
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    /* =========================================================
+       Typography
+       ========================================================= */
+    h1, h2, h3 {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .slide-number {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+
+    /* =========================================================
+       Reveal Animations
+       ========================================================= */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition:
+        opacity var(--reveal-duration) var(--ease-out),
+        transform var(--reveal-duration) var(--ease-out);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger children */
+    .stagger > .reveal:nth-child(1) { transition-delay: calc(var(--reveal-stagger) * 0); }
+    .stagger > .reveal:nth-child(2) { transition-delay: calc(var(--reveal-stagger) * 1); }
+    .stagger > .reveal:nth-child(3) { transition-delay: calc(var(--reveal-stagger) * 2); }
+    .stagger > .reveal:nth-child(4) { transition-delay: calc(var(--reveal-stagger) * 3); }
+    .stagger > .reveal:nth-child(5) { transition-delay: calc(var(--reveal-stagger) * 4); }
+    .stagger > .reveal:nth-child(6) { transition-delay: calc(var(--reveal-stagger) * 5); }
+    .stagger > .reveal:nth-child(7) { transition-delay: calc(var(--reveal-stagger) * 6); }
+    .stagger > .reveal:nth-child(8) { transition-delay: calc(var(--reveal-stagger) * 7); }
+    .stagger > .reveal:nth-child(9) { transition-delay: calc(var(--reveal-stagger) * 8); }
+    .stagger > .reveal:nth-child(10) { transition-delay: calc(var(--reveal-stagger) * 9); }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      html {
+        scroll-behavior: auto;
+      }
+      .flow-path {
+        stroke-dasharray: none !important;
+        animation: none !important;
+      }
+      .flow-node {
+        animation: none !important;
+      }
+    }
+
+    /* =========================================================
+       Heading styles shared across slides
+       ========================================================= */
+    .slide h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 8px;
+    }
+
+    .slide .slide-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    /* =========================================================
+       SLIDE 1 — Title Slide
+       ========================================================= */
+    .title-slide {
+      text-align: center;
+    }
+
+    .title-slide h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+
+    .title-slide .subtitle {
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+
+    .title-slide .workshop-label {
+      font-size: 14px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 500;
+    }
+
+    .title-slide .accent-line {
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+      margin: 28px auto;
+      border-radius: 2px;
+    }
+
+    /* =========================================================
+       SLIDE 2 — AI Toolbox Table
+       ========================================================= */
+    .toolbox-table {
+      width: 100%;
+      margin-top: 32px;
+      border-collapse: separate;
+      border-spacing: 0 8px;
+    }
+
+    .toolbox-table thead th {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      color: var(--accent);
+      padding: 12px 20px;
+      text-align: left;
+      border-bottom: 1px solid rgba(0, 229, 160, 0.15);
+    }
+
+    .toolbox-table tbody tr {
+      background: var(--bg-secondary);
+      transition: transform 0.2s var(--ease-out), box-shadow 0.2s;
+    }
+
+    .toolbox-table tbody tr:hover {
+      transform: translateX(4px);
+      box-shadow: -4px 0 0 var(--accent);
+    }
+
+    .toolbox-table td {
+      padding: 16px 20px;
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+      vertical-align: top;
+    }
+
+    .toolbox-table td:first-child {
+      border-radius: 10px 0 0 10px;
+    }
+
+    .toolbox-table td:last-child {
+      border-radius: 0 10px 10px 0;
+    }
+
+    .toolbox-name {
+      font-family: 'Courier New', monospace;
+      font-weight: 700;
+      color: var(--text-primary);
+      font-size: 0.95rem;
+      white-space: nowrap;
+    }
+
+    .toolbox-what {
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .toolbox-example {
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.03);
+      padding: 4px 10px;
+      border-radius: 6px;
+      display: inline-block;
+    }
+
+    .toolbox-note {
+      margin-top: 28px;
+      padding: 20px 28px;
+      background: var(--accent-dim);
+      border-radius: 12px;
+      border: 1px solid rgba(0, 229, 160, 0.15);
+      text-align: center;
+      font-size: 1.05rem;
+      color: var(--text-primary);
+      font-weight: 500;
+    }
+
+    .toolbox-note strong {
+      color: var(--accent);
+    }
+
+    /* =========================================================
+       SLIDE 3 — The Problem
+       ========================================================= */
+    .problem-points {
+      margin-top: 36px;
+      list-style: none;
+    }
+
+    .problem-points li {
+      position: relative;
+      padding: 18px 24px 18px 56px;
+      margin-bottom: 14px;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 1.15rem;
+      color: var(--text-primary);
+      transition: border-color 0.3s, box-shadow 0.3s;
+    }
+
+    .problem-points li:hover {
+      border-color: var(--accent-dim);
+      box-shadow: 0 0 24px rgba(0, 229, 160, 0.06);
+    }
+
+    .problem-points li::before {
+      position: absolute;
+      left: 18px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 13px;
+      font-weight: 700;
+      color: var(--red-tint);
+      font-family: var(--font-heading);
+    }
+
+    .problem-points li:nth-child(1)::before { content: '01'; }
+    .problem-points li:nth-child(2)::before { content: '02'; }
+    .problem-points li:nth-child(3)::before { content: '03'; }
+    .problem-points li:nth-child(4)::before { content: '04'; }
+
+    .problem-punchline {
+      margin-top: 32px;
+      padding: 24px 32px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border-left: 3px solid var(--accent);
+      font-size: 1.2rem;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      color: var(--accent);
+    }
+
+    /* =========================================================
+       SLIDE 4 — Code Factory (Two Columns)
+       ========================================================= */
+    .comparison-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 40px;
+    }
+
+    .comparison-col {
+      padding: 36px 28px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .comparison-col--old {
+      background: var(--red-bg);
+      border-color: rgba(255, 107, 107, 0.12);
+    }
+
+    .comparison-col--new {
+      background: var(--green-bg);
+      border-color: rgba(0, 229, 160, 0.15);
+    }
+
+    .comparison-col-title {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.15rem;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .comparison-col--old .comparison-col-title { color: var(--red-tint); }
+    .comparison-col--new .comparison-col-title { color: var(--accent); }
+
+    .comparison-flow {
+      list-style: none;
+    }
+
+    .comparison-flow li {
+      padding: 10px 16px;
+      margin-bottom: 8px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      position: relative;
+      padding-left: 36px;
+    }
+
+    .comparison-flow li::before {
+      content: '';
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+    }
+
+    .comparison-col--old .comparison-flow li::before {
+      background: rgba(255, 107, 107, 0.4);
+    }
+
+    .comparison-col--new .comparison-flow li::before {
+      background: rgba(0, 229, 160, 0.5);
+    }
+
+    .comparison-flow .flow-arrow {
+      background: none;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 1rem;
+      padding: 2px 0;
+      padding-left: 16px;
+    }
+
+    .comparison-flow .flow-arrow::before {
+      display: none;
+    }
+
+    .comparison-punchline {
+      margin-top: 32px;
+      text-align: center;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.3rem;
+      color: var(--accent);
+      text-shadow: 0 0 30px var(--accent-glow);
+    }
+
+    /* =========================================================
+       SLIDE 5 — Junior Dev Analogy
+       ========================================================= */
+    .spec-list {
+      margin-top: 32px;
+      list-style: none;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .spec-list li {
+      padding: 16px 20px 16px 48px;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      font-size: 1rem;
+      color: var(--text-primary);
+      position: relative;
+    }
+
+    .spec-list li::before {
+      content: attr(data-icon);
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 16px;
+      width: 24px;
+      text-align: center;
+    }
+
+    .analogy-callout {
+      margin-top: 36px;
+      padding: 28px 32px;
+      background: var(--accent-dim);
+      border-radius: 14px;
+      border: 1px solid rgba(0, 229, 160, 0.15);
+      text-align: center;
+    }
+
+    .analogy-callout p:first-child {
+      font-size: 1.15rem;
+      color: var(--text-primary);
+      margin-bottom: 8px;
+      font-weight: 600;
+    }
+
+    .analogy-callout p:last-child {
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+    }
+
+    /* =========================================================
+       SLIDE 6 — Workflow Overview
+       ========================================================= */
+    .workflow-files {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-top: 36px;
+    }
+
+    .workflow-file {
+      padding: 28px 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--bg-secondary);
+    }
+
+    .workflow-file-name {
+      font-family: 'Courier New', monospace;
+      font-size: 0.9rem;
+      color: var(--accent);
+      background: var(--accent-dim);
+      padding: 4px 12px;
+      border-radius: 6px;
+      display: inline-block;
+      margin-bottom: 12px;
+    }
+
+    .workflow-file-desc {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+    }
+
+    .workflow-steps {
+      margin-top: 36px;
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .workflow-step {
+      flex: 1;
+      min-width: 140px;
+      max-width: 200px;
+      padding: 20px 16px;
+      text-align: center;
+      position: relative;
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.9rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 12px;
+      border: 2px solid rgba(0, 229, 160, 0.2);
+    }
+
+    .step-label {
+      font-size: 0.85rem;
+      color: var(--text-primary);
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .step-detail {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+    }
+
+    .workflow-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -8px;
+      top: 37px;
+      width: 16px;
+      height: 2px;
+      background: rgba(0, 229, 160, 0.3);
+    }
+
+    /* =========================================================
+       SLIDE 7 — create-prd.mdc
+       ========================================================= */
+    .prd-sections {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 24px;
+      margin-top: 36px;
+    }
+
+    .prd-card {
+      padding: 28px 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--bg-secondary);
+    }
+
+    .prd-card-title {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1rem;
+      margin-bottom: 16px;
+      color: var(--text-primary);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .prd-card-icon {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+      flex-shrink: 0;
+    }
+
+    .prd-card:nth-child(1) .prd-card-icon {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .prd-card:nth-child(2) .prd-card-icon {
+      background: var(--blue-bg);
+      color: var(--blue-tint);
+    }
+
+    .prd-card:nth-child(3) .prd-card-icon {
+      background: var(--red-bg);
+      color: var(--red-tint);
+    }
+
+    .prd-card ul {
+      list-style: none;
+    }
+
+    .prd-card li {
+      padding: 5px 0;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      padding-left: 14px;
+      position: relative;
+    }
+
+    .prd-card li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 13px;
+      width: 5px;
+      height: 5px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .prd-flow {
+      margin-top: 28px;
+      padding: 20px 28px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 20px;
+      flex-wrap: wrap;
+    }
+
+    .prd-flow-step {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      padding: 8px 16px;
+      background: rgba(255, 255, 255, 0.03);
+      border-radius: 8px;
+    }
+
+    .prd-flow-step.highlight {
+      color: var(--accent);
+      background: var(--accent-dim);
+      font-weight: 600;
+    }
+
+    .prd-flow-arrow {
+      color: rgba(255, 255, 255, 0.2);
+      font-size: 1.2rem;
+    }
+
+    /* =========================================================
+       SLIDE 8 — generate-tasks.mdc
+       ========================================================= */
+    .phases-container {
+      display: grid;
+      grid-template-columns: 1fr auto 1fr;
+      gap: 0;
+      margin-top: 36px;
+      align-items: stretch;
+    }
+
+    .phase-card {
+      padding: 28px 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--bg-secondary);
+    }
+
+    .phase-label {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.85rem;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    .phase-card:first-child .phase-label { color: var(--blue-tint); }
+    .phase-card:last-child .phase-label { color: var(--accent); }
+
+    .phase-tasks {
+      list-style: none;
+    }
+
+    .phase-tasks li {
+      padding: 8px 12px;
+      margin-bottom: 6px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      background: rgba(255, 255, 255, 0.02);
+      border-radius: 6px;
+      font-family: 'Courier New', monospace;
+    }
+
+    .phase-tasks li .checkbox {
+      color: var(--text-secondary);
+      margin-right: 4px;
+    }
+
+    .go-gate {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 24px;
+      gap: 12px;
+    }
+
+    .go-gate-line {
+      width: 2px;
+      height: 40px;
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.1), var(--yellow-tint));
+    }
+
+    .go-gate-btn {
+      background: var(--yellow-bg);
+      border: 2px solid rgba(251, 191, 36, 0.3);
+      color: var(--yellow-tint);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1rem;
+      padding: 10px 24px;
+      border-radius: 10px;
+      cursor: default;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      box-shadow: 0 0 20px rgba(251, 191, 36, 0.1);
+    }
+
+    .go-gate-label {
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-align: center;
+      max-width: 100px;
+    }
+
+    .checkpoint-note {
+      margin-top: 28px;
+      padding: 18px 24px;
+      background: var(--yellow-bg);
+      border-radius: 10px;
+      border: 1px solid rgba(251, 191, 36, 0.15);
+      font-size: 0.92rem;
+      color: var(--text-secondary);
+    }
+
+    .checkpoint-note strong {
+      color: var(--yellow-tint);
+    }
+
+    /* =========================================================
+       SLIDE 9 — Execution
+       ========================================================= */
+    .execution-loop {
+      display: flex;
+      gap: 0;
+      margin-top: 36px;
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+
+    .exec-step {
+      padding: 20px 18px;
+      text-align: center;
+      position: relative;
+      flex: 1;
+      min-width: 110px;
+      max-width: 160px;
+    }
+
+    .exec-step-icon {
+      width: 44px;
+      height: 44px;
+      border-radius: 12px;
+      background: var(--accent-dim);
+      border: 1px solid rgba(0, 229, 160, 0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin: 0 auto 10px;
+      font-size: 18px;
+      color: var(--accent);
+    }
+
+    .exec-step-label {
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 2px;
+    }
+
+    .exec-step-detail {
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+    }
+
+    .exec-step:not(:last-child)::after {
+      content: '';
+      position: absolute;
+      right: -4px;
+      top: 40px;
+      width: 8px;
+      height: 2px;
+      background: rgba(0, 229, 160, 0.3);
+    }
+
+    .exec-code-block {
+      margin-top: 32px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      padding: 24px 28px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      font-family: 'Courier New', monospace;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      line-height: 1.8;
+    }
+
+    .exec-code-block .checked {
+      color: var(--accent);
+      text-decoration: line-through;
+      text-decoration-color: rgba(0, 229, 160, 0.3);
+    }
+
+    .exec-code-block .unchecked {
+      color: var(--text-primary);
+    }
+
+    .exec-code-block .checkbox-mark {
+      color: var(--accent);
+    }
+
+    .exec-code-block .checkbox-empty {
+      color: var(--text-secondary);
+    }
+
+    /* =========================================================
+       SLIDE 10 — Full Flow Diagram
+       ========================================================= */
+    .flow-diagram {
+      margin-top: 24px;
+      width: 100%;
+      position: relative;
+    }
+
+    .flow-diagram svg {
+      width: 100%;
+      height: auto;
+    }
+
+    .flow-node {
+      opacity: 0;
+      animation: flowNodeIn 0.6s var(--ease-out) forwards;
+    }
+
+    .flow-node:nth-child(1) { animation-delay: 0.1s; }
+    .flow-node:nth-child(2) { animation-delay: 0.3s; }
+    .flow-node:nth-child(3) { animation-delay: 0.5s; }
+    .flow-node:nth-child(4) { animation-delay: 0.7s; }
+    .flow-node:nth-child(5) { animation-delay: 0.9s; }
+    .flow-node:nth-child(6) { animation-delay: 1.1s; }
+    .flow-node:nth-child(7) { animation-delay: 1.3s; }
+    .flow-node:nth-child(8) { animation-delay: 1.5s; }
+
+    @keyframes flowNodeIn {
+      from {
+        opacity: 0;
+        transform: translateY(10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .flow-path {
+      stroke-dasharray: 1000;
+      stroke-dashoffset: 1000;
+      animation: drawPath 2s var(--ease-out) forwards;
+    }
+
+    .flow-path:nth-child(1) { animation-delay: 0.2s; }
+    .flow-path:nth-child(2) { animation-delay: 0.6s; }
+    .flow-path:nth-child(3) { animation-delay: 1.0s; }
+    .flow-path:nth-child(4) { animation-delay: 1.4s; }
+    .flow-path:nth-child(5) { animation-delay: 1.8s; }
+
+    @keyframes drawPath {
+      to {
+        stroke-dashoffset: 0;
+      }
+    }
+
+    .flow-svg-container {
+      background: var(--bg-secondary);
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      padding: 32px 24px;
+      overflow: hidden;
+    }
+
+    .flow-svg-container.animate .flow-node {
+      opacity: 0;
+    }
+
+    .flow-svg-container.in-view .flow-node {
+      animation-play-state: running;
+    }
+
+    /* =========================================================
+       SLIDE 11 — Failure Modes
+       ========================================================= */
+    .failure-cards {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 18px;
+      margin-top: 32px;
+    }
+
+    .failure-card {
+      padding: 24px 22px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      background: var(--bg-secondary);
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    }
+
+    .failure-card:hover {
+      border-color: rgba(255, 107, 107, 0.2);
+      box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+      transform: translateY(-2px);
+    }
+
+    .failure-card-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    .failure-card-number {
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--red-bg);
+      color: var(--red-tint);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.8rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .failure-card-title {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--red-tint);
+    }
+
+    .failure-card-body {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      margin-bottom: 12px;
+      line-height: 1.5;
+    }
+
+    .failure-card-fix {
+      font-size: 0.82rem;
+      color: var(--accent);
+      padding: 8px 12px;
+      background: var(--accent-dim);
+      border-radius: 8px;
+      display: flex;
+      align-items: flex-start;
+      gap: 6px;
+    }
+
+    .failure-card-fix::before {
+      content: '>';
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    /* =========================================================
+       SLIDE 12 — Live Demo
+       ========================================================= */
+    .demo-feature {
+      margin-top: 28px;
+      padding: 20px 28px;
+      background: var(--accent-dim);
+      border-radius: 12px;
+      border: 1px solid rgba(0, 229, 160, 0.15);
+      text-align: center;
+    }
+
+    .demo-feature-label {
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 6px;
+    }
+
+    .demo-feature-name {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.3rem;
+      color: var(--accent);
+    }
+
+    .demo-timeline {
+      margin-top: 36px;
+      position: relative;
+      padding-left: 40px;
+    }
+
+    .demo-timeline::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 0;
+      bottom: 0;
+      width: 2px;
+      background: linear-gradient(180deg,
+        var(--accent),
+        rgba(0, 229, 160, 0.3),
+        var(--red-tint)
+      );
+    }
+
+    .demo-step {
+      position: relative;
+      margin-bottom: 20px;
+      padding: 18px 22px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      transition: border-color 0.3s;
+    }
+
+    .demo-step:hover {
+      border-color: var(--accent-dim);
+    }
+
+    .demo-step::before {
+      content: attr(data-step);
+      position: absolute;
+      left: -40px;
+      top: 18px;
+      width: 28px;
+      height: 28px;
+      border-radius: 50%;
+      background: var(--bg-primary);
+      border: 2px solid var(--accent);
+      color: var(--accent);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 0.75rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .demo-step-title {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1rem;
+      color: var(--text-primary);
+      margin-bottom: 6px;
+    }
+
+    .demo-step-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    .demo-step-time {
+      font-size: 0.72rem;
+      color: var(--accent);
+      margin-top: 6px;
+      font-weight: 600;
+    }
+
+    .demo-step:last-child {
+      border-color: rgba(255, 107, 107, 0.15);
+    }
+
+    .demo-step:last-child .demo-step-title {
+      color: var(--red-tint);
+    }
+
+    .demo-step:last-child::before {
+      border-color: var(--red-tint);
+      color: var(--red-tint);
+    }
+
+    .demo-step:last-child:hover {
+      border-color: rgba(255, 107, 107, 0.3);
+    }
+
+    .demo-cmd {
+      font-family: 'Courier New', monospace;
+      font-size: 0.82rem;
+      color: var(--accent);
+      background: rgba(0, 229, 160, 0.06);
+      padding: 6px 12px;
+      border-radius: 6px;
+      display: block;
+      margin-top: 8px;
+      border-left: 2px solid rgba(0, 229, 160, 0.3);
+    }
+
+    .demo-cmd-prompt {
+      color: var(--text-secondary);
+      user-select: none;
+    }
+
+    .demo-contrast {
+      margin-top: 12px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+
+    .demo-contrast-card {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 0.82rem;
+    }
+
+    .demo-contrast-card--good {
+      background: var(--green-bg);
+      border: 1px solid rgba(0, 229, 160, 0.15);
+      color: var(--accent);
+    }
+
+    .demo-contrast-card--bad {
+      background: var(--red-bg);
+      border: 1px solid rgba(255, 107, 107, 0.15);
+      color: var(--red-tint);
+    }
+
+    .demo-contrast-label {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 4px;
+    }
+
+    /* =========================================================
+       Mobile responsive
+       ========================================================= */
+    @media (max-width: 768px) {
+      :root {
+        --slide-padding: 32px 20px;
+      }
+
+      .nav-dots {
+        right: 12px;
+        gap: 10px;
+      }
+
+      .nav-dot {
+        width: 8px;
+        height: 8px;
+      }
+
+      .nav-dot::after {
+        display: none;
+      }
+
+      .comparison-columns {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .prd-sections {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .phases-container {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .go-gate {
+        flex-direction: row;
+        padding: 16px 0;
+      }
+
+      .go-gate-line {
+        width: 40px;
+        height: 2px;
+      }
+
+      .spec-list {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-files {
+        grid-template-columns: 1fr;
+      }
+
+      .workflow-steps {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .workflow-step:not(:last-child)::after {
+        right: 50%;
+        top: auto;
+        bottom: -6px;
+        width: 2px;
+        height: 8px;
+        transform: translateX(50%);
+      }
+
+      .execution-loop {
+        flex-direction: column;
+        align-items: center;
+      }
+
+      .exec-step:not(:last-child)::after {
+        right: 50%;
+        top: auto;
+        bottom: -4px;
+        width: 2px;
+        height: 8px;
+        transform: translateX(50%);
+      }
+
+      .failure-cards {
+        grid-template-columns: 1fr;
+      }
+
+      .problem-points li {
+        font-size: 1rem;
+        padding: 14px 16px 14px 44px;
+      }
+
+      .toolbox-table {
+        font-size: 0.85rem;
+      }
+
+      .toolbox-table thead th {
+        padding: 8px 12px;
+        font-size: 0.72rem;
+      }
+
+      .toolbox-table td {
+        padding: 10px 12px;
+        font-size: 0.82rem;
+      }
+
+      .demo-contrast {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .title-slide h1 {
+        font-size: 2.4rem;
+      }
+
+      .comparison-punchline {
+        font-size: 1.1rem;
+      }
+
+      .demo-timeline {
+        padding-left: 32px;
+      }
+
+      .demo-step::before {
+        left: -32px;
+        width: 24px;
+        height: 24px;
+        font-size: 0.7rem;
+      }
+
+      .toolbox-table thead {
+        display: none;
+      }
+
+      .toolbox-table tbody tr {
+        display: flex;
+        flex-direction: column;
+        padding: 16px;
+        border-radius: 10px;
+        margin-bottom: 8px;
+      }
+
+      .toolbox-table td {
+        padding: 4px 0;
+      }
+
+      .toolbox-table td:first-child,
+      .toolbox-table td:last-child {
+        border-radius: 0;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Navigation dots -->
+  <nav class="nav-dots" id="navDots">
+    <button class="nav-dot active" data-slide="0" data-label="Title" aria-label="Go to Title slide"></button>
+    <button class="nav-dot" data-slide="1" data-label="AI Toolbox" aria-label="Go to AI Toolbox slide"></button>
+    <button class="nav-dot" data-slide="2" data-label="The Problem" aria-label="Go to The Problem slide"></button>
+    <button class="nav-dot" data-slide="3" data-label="Code Factory" aria-label="Go to Code Factory slide"></button>
+    <button class="nav-dot" data-slide="4" data-label="Junior Dev" aria-label="Go to Junior Dev slide"></button>
+    <button class="nav-dot" data-slide="5" data-label="Workflow" aria-label="Go to Workflow slide"></button>
+    <button class="nav-dot" data-slide="6" data-label="create-prd" aria-label="Go to create-prd slide"></button>
+    <button class="nav-dot" data-slide="7" data-label="generate-tasks" aria-label="Go to generate-tasks slide"></button>
+    <button class="nav-dot" data-slide="8" data-label="Execution" aria-label="Go to Execution slide"></button>
+    <button class="nav-dot" data-slide="9" data-label="Full Flow" aria-label="Go to Full Flow slide"></button>
+    <button class="nav-dot" data-slide="10" data-label="Failure Modes" aria-label="Go to Failure Modes slide"></button>
+    <button class="nav-dot" data-slide="11" data-label="Live Demo" aria-label="Go to Live Demo slide"></button>
+  </nav>
+
+  <!-- ====================================================
+       SLIDE 1 — Title
+       ==================================================== -->
+  <section class="slide title-slide" id="slide-0">
+    <div class="slide-inner" style="text-align:center;">
+      <div class="reveal">
+        <p class="workshop-label" style="margin-bottom:24px;">AI Development Workshop</p>
+      </div>
+      <div class="reveal">
+        <h1>The AI Dev Tasks Workflow</h1>
+      </div>
+      <div class="reveal">
+        <div class="accent-line"></div>
+      </div>
+      <div class="reveal">
+        <p class="subtitle">Section 2 &mdash; 9:45&ndash;11:00</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 2 — Your AI Toolbox (2.1)
+       ==================================================== -->
+  <section class="slide" id="slide-1">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.1</span>
+        <h2>What's Available to You</h2>
+        <p class="slide-subtitle">Your AI Toolbox</p>
+      </div>
+      <div class="reveal">
+        <table class="toolbox-table">
+          <thead>
+            <tr>
+              <th>Building Block</th>
+              <th>What It Is</th>
+              <th>Example</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><span class="toolbox-name">CLAUDE.md</span></td>
+              <td class="toolbox-what">Project-level instructions that persist across sessions. Your codebase context, conventions, rules.</td>
+              <td><span class="toolbox-example">"Always use Express.js for new services, vitest for tests"</span></td>
+            </tr>
+            <tr>
+              <td><span class="toolbox-name">Rules / .cursor/rules/</span></td>
+              <td class="toolbox-what">Tool-specific rule files. Auto-loaded context for your AI tool.</td>
+              <td><span class="toolbox-example">create-prd.mdc, generate-tasks.mdc</span></td>
+            </tr>
+            <tr>
+              <td><span class="toolbox-name">MCP Servers</span></td>
+              <td class="toolbox-what">External tool integrations. Connect your AI to databases, APIs, services.</td>
+              <td><span class="toolbox-example">GitHub, Notion, Slack, databases</span></td>
+            </tr>
+            <tr>
+              <td><span class="toolbox-name">Skills</span></td>
+              <td class="toolbox-what">Reusable prompt workflows. Packaged expertise you can invoke.</td>
+              <td><span class="toolbox-example">/commit, /review-pr</span></td>
+            </tr>
+            <tr>
+              <td><span class="toolbox-name">Agents</span></td>
+              <td class="toolbox-what">Custom AI agents with specific roles and tool access.</td>
+              <td><span class="toolbox-example">A test-runner agent, a code-reviewer agent</span></td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="reveal">
+        <div class="toolbox-note">
+          Today we use <strong>one building block: rule files</strong>. But knowing the landscape helps you see where to go next.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 3 — The Problem (2.2)
+       ==================================================== -->
+  <section class="slide" id="slide-2">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.2</span>
+        <h2>You're Thinking at the<br>Wrong Level</h2>
+      </div>
+      <ul class="problem-points stagger">
+        <li class="reveal">When you use AI line-by-line, you're optimizing typing speed</li>
+        <li class="reveal">Typing was never the bottleneck. <strong>Thinking</strong> was.</li>
+        <li class="reveal">The expensive part: figuring out <em>what</em> to build, how to structure it, what edge cases to handle</li>
+        <li class="reveal">AI can help with all of that &mdash; but only if you stop using it as a fancy autocomplete</li>
+      </ul>
+      <div class="reveal">
+        <div class="problem-punchline">
+          Stop optimizing typing. Start optimizing thinking.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 4 — Code Factory Philosophy (2.3)
+       ==================================================== -->
+  <section class="slide" id="slide-3">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.3</span>
+        <h2>You're the PM/Architect.<br>AI Is the Dev&nbsp;Team.</h2>
+      </div>
+      <div class="reveal">
+        <div class="comparison-columns">
+          <div class="comparison-col comparison-col--old">
+            <div class="comparison-col-title">
+              <span style="font-size:18px;">&#x2717;</span> Traditional
+            </div>
+            <ul class="comparison-flow">
+              <li>Think about what to build</li>
+              <li class="flow-arrow">&#x2193;</li>
+              <li>You build it yourself</li>
+              <li class="flow-arrow">&#x2193;</li>
+              <li>Ship</li>
+            </ul>
+          </div>
+          <div class="comparison-col comparison-col--new">
+            <div class="comparison-col-title">
+              <span style="font-size:18px;">&#x2713;</span> Code Factory
+            </div>
+            <ul class="comparison-flow">
+              <li>Think about what to build</li>
+              <li class="flow-arrow">&#x2193;</li>
+              <li>Write a precise spec</li>
+              <li class="flow-arrow">&#x2193;</li>
+              <li>AI builds it</li>
+              <li class="flow-arrow">&#x2193;</li>
+              <li>You review &amp; steer</li>
+              <li class="flow-arrow">&#x2193;</li>
+              <li>Ship</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="comparison-punchline">
+          This isn't lazy. This is leverage.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 5 — Junior Dev Analogy (2.4)
+       ==================================================== -->
+  <section class="slide" id="slide-4">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.4</span>
+        <h2>Would You Hand a Junior Dev<br>a Vague Slack&nbsp;Message?</h2>
+      </div>
+      <div class="reveal">
+        <p style="color:var(--text-secondary); font-size:1.05rem; margin-top:16px; margin-bottom:8px;">
+          Smart, fast, but no context. You wouldn't say <span style="color:var(--red-tint);">"Add search to the marketplace"</span> and walk away. You'd write:
+        </p>
+      </div>
+      <ul class="spec-list stagger">
+        <li class="reveal" data-icon="&#9654;">What the feature does</li>
+        <li class="reveal" data-icon="&#123;&#125;">What the API looks like</li>
+        <li class="reveal" data-icon="&#9638;">What data models are involved</li>
+        <li class="reveal" data-icon="&#9888;">What edge cases to handle</li>
+        <li class="reveal" data-icon="&#10003;">How to test it</li>
+      </ul>
+      <div class="reveal">
+        <div class="analogy-callout">
+          <p>AI is that junior dev. The system is how you write that spec.</p>
+          <p>The spec IS the work. The coding is the easy part.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 6 — Workflow Overview (2.5)
+       ==================================================== -->
+  <section class="slide" id="slide-5">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.5</span>
+        <h2>Two Files, Five Steps</h2>
+      </div>
+      <div class="reveal">
+        <div class="workflow-files">
+          <div class="workflow-file">
+            <span class="workflow-file-name">create-prd.mdc</span>
+            <div class="workflow-file-desc">"What to build"</div>
+          </div>
+          <div class="workflow-file">
+            <span class="workflow-file-name">generate-tasks.mdc</span>
+            <div class="workflow-file-desc">"How to break it down + execute"</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="workflow-steps">
+          <div class="workflow-step">
+            <div class="step-number">1</div>
+            <div class="step-label">Create PRD</div>
+            <div class="step-detail">Vague idea &rarr; structured spec</div>
+          </div>
+          <div class="workflow-step">
+            <div class="step-number">2</div>
+            <div class="step-label">Parent Tasks</div>
+            <div class="step-detail">High-level breakdown</div>
+          </div>
+          <div class="workflow-step">
+            <div class="step-number">3</div>
+            <div class="step-label">Say "Go"</div>
+            <div class="step-detail">Review gate &rarr; subtasks</div>
+          </div>
+          <div class="workflow-step">
+            <div class="step-number">4</div>
+            <div class="step-label">Execute</div>
+            <div class="step-detail">One task at a time</div>
+          </div>
+          <div class="workflow-step">
+            <div class="step-number">5</div>
+            <div class="step-label">PR + CI</div>
+            <div class="step-detail">Push, test, merge</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal" style="margin-top:24px; text-align:center;">
+        <p style="font-size:0.9rem; color:var(--text-secondary);">
+          Two rule files. Output of the first feeds into the second.<br>The second generates a task list with execution instructions baked&nbsp;in.
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 7 — create-prd.mdc (2.6)
+       ==================================================== -->
+  <section class="slide" id="slide-6">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.6</span>
+        <h2>Turning Ideas into Specs</h2>
+        <p class="slide-subtitle" style="margin-top:4px;">
+          <span style="font-family:'Courier New',monospace; color:var(--accent); font-size:0.9rem;">create-prd.mdc</span>
+        </p>
+      </div>
+      <div class="reveal">
+        <div class="prd-flow">
+          <span class="prd-flow-step">Vague idea</span>
+          <span class="prd-flow-arrow">&rarr;</span>
+          <span class="prd-flow-step highlight">AI asks 3&ndash;5 questions</span>
+          <span class="prd-flow-arrow">&rarr;</span>
+          <span class="prd-flow-step">You answer "1A, 2C, 3B"</span>
+          <span class="prd-flow-arrow">&rarr;</span>
+          <span class="prd-flow-step highlight">Structured PRD</span>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="prd-sections">
+          <div class="prd-card">
+            <div class="prd-card-title">
+              <span class="prd-card-icon">&#9881;</span>
+              What it does
+            </div>
+            <ul>
+              <li>Takes a vague feature idea as input</li>
+              <li>AI asks 3&ndash;5 clarifying questions with lettered options</li>
+              <li>Produces structured PRD: overview, goals, user stories, requirements</li>
+              <li>Saves to <code style="color:var(--accent);">tasks/prd-[name].md</code></li>
+            </ul>
+          </div>
+          <div class="prd-card">
+            <div class="prd-card-title">
+              <span class="prd-card-icon">&#10038;</span>
+              Why it exists
+            </div>
+            <ul>
+              <li>Forces you to think through the feature before any code</li>
+              <li>Surfaces edge cases you'd discover mid-implementation</li>
+              <li>Gives AI enough context to produce good code later</li>
+            </ul>
+          </div>
+          <div class="prd-card">
+            <div class="prd-card-title">
+              <span class="prd-card-icon">&#9888;</span>
+              Without it
+            </div>
+            <ul>
+              <li>AI builds based on assumptions</li>
+              <li>Missing requirements discovered 3 tasks deep</li>
+              <li>Rework, frustration, "AI sucks" feelings</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 8 — generate-tasks.mdc (2.7)
+       ==================================================== -->
+  <section class="slide" id="slide-7">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.7</span>
+        <h2>From Spec to Executable<br>Task&nbsp;List</h2>
+        <p class="slide-subtitle" style="margin-top:4px;">
+          <span style="font-family:'Courier New',monospace; color:var(--accent); font-size:0.9rem;">generate-tasks.mdc</span>
+        </p>
+      </div>
+      <div class="reveal">
+        <div class="phases-container">
+          <div class="phase-card">
+            <div class="phase-label">Phase 1 &mdash; Parent Tasks</div>
+            <ul class="phase-tasks">
+              <li><span class="checkbox">- [ ]</span> 0.0 Create feature branch</li>
+              <li><span class="checkbox">- [ ]</span> 1.0 Health check endpoint</li>
+              <li><span class="checkbox">- [ ]</span> 2.0 Database connectivity check</li>
+              <li><span class="checkbox">- [ ]</span> 3.0 Response format &amp; docs</li>
+            </ul>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:12px; font-style:italic;">
+              AI generates this, then STOPS.
+            </p>
+          </div>
+          <div class="go-gate">
+            <div class="go-gate-line"></div>
+            <div class="go-gate-btn">GO</div>
+            <div class="go-gate-label">You review, then approve</div>
+            <div class="go-gate-line"></div>
+          </div>
+          <div class="phase-card">
+            <div class="phase-label">Phase 2 &mdash; Subtasks</div>
+            <ul class="phase-tasks">
+              <li><span class="checkbox">- [ ]</span> 1.0 Health check endpoint</li>
+              <li style="padding-left:24px;"><span class="checkbox">- [ ]</span> 1.1 Define response schema</li>
+              <li style="padding-left:24px;"><span class="checkbox">- [ ]</span> 1.2 Implement health route</li>
+              <li style="padding-left:24px;"><span class="checkbox">- [ ]</span> 1.3 Add to Express router</li>
+            </ul>
+            <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:12px; font-style:italic;">
+              + Relevant Files + Execution instructions
+            </p>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="checkpoint-note">
+          <strong>Why the "Go" gate?</strong> You catch bad high-level plans before investing time in subtask details. The gate prevents the AI from running off in the wrong direction.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 9 — Execution (2.8)
+       ==================================================== -->
+  <section class="slide" id="slide-8">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.8</span>
+        <h2>No Third File &mdash;<br>Execution Lives in the&nbsp;Output</h2>
+      </div>
+      <div class="reveal">
+        <p style="color:var(--text-secondary); font-size:1rem; margin-top:12px;">
+          You tell the AI: <span style="color:var(--accent); font-family:'Courier New',monospace;">"Start on task 1.1"</span> and it follows the loop:
+        </p>
+      </div>
+      <div class="reveal">
+        <div class="execution-loop">
+          <div class="exec-step">
+            <div class="exec-step-icon">&#128269;</div>
+            <div class="exec-step-label">Read</div>
+            <div class="exec-step-detail">Context &amp; patterns</div>
+          </div>
+          <div class="exec-step">
+            <div class="exec-step-icon">&#9997;</div>
+            <div class="exec-step-label">Test</div>
+            <div class="exec-step-detail">Write test first</div>
+          </div>
+          <div class="exec-step">
+            <div class="exec-step-icon">&#9881;</div>
+            <div class="exec-step-label">Implement</div>
+            <div class="exec-step-detail">Write the code</div>
+          </div>
+          <div class="exec-step">
+            <div class="exec-step-icon">&#9654;</div>
+            <div class="exec-step-label">Run Tests</div>
+            <div class="exec-step-detail">Verify it works</div>
+          </div>
+          <div class="exec-step">
+            <div class="exec-step-icon">&#10003;</div>
+            <div class="exec-step-label">Mark [x]</div>
+            <div class="exec-step-detail">Update task list</div>
+          </div>
+          <div class="exec-step">
+            <div class="exec-step-icon">&#128190;</div>
+            <div class="exec-step-label">Commit</div>
+            <div class="exec-step-detail">Atomic commit</div>
+          </div>
+          <div class="exec-step">
+            <div class="exec-step-icon">&#8635;</div>
+            <div class="exec-step-label">Next</div>
+            <div class="exec-step-detail">Repeat</div>
+          </div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="exec-code-block">
+          <div style="color:var(--text-secondary); margin-bottom:12px; font-size:0.8rem; text-transform:uppercase; letter-spacing:0.1em;">Task list after execution:</div>
+          <div class="checked"><span class="checkbox-mark">- [x]</span> 1.1 Define health check response schema</div>
+          <div class="checked"><span class="checkbox-mark">- [x]</span> 1.2 Implement basic health route</div>
+          <div class="unchecked"><span class="checkbox-empty">- [ ]</span> 1.3 Add to Express router</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 10 — Full Flow Diagram (2.9)
+       ==================================================== -->
+  <section class="slide" id="slide-9">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.9</span>
+        <h2>The Full Cycle</h2>
+      </div>
+      <div class="reveal">
+        <div class="flow-svg-container" id="flowDiagram">
+          <svg viewBox="0 0 1000 560" fill="none" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">
+            <!-- Animated connection paths -->
+            <g class="flow-paths">
+              <path class="flow-path" d="M500 75 L500 115" stroke="#00e5a0" stroke-width="2" stroke-linecap="round"/>
+              <path class="flow-path" d="M500 195 L500 235" stroke="#00e5a0" stroke-width="2" stroke-linecap="round"/>
+              <path class="flow-path" d="M380 310 L380 345" stroke="#00e5a0" stroke-width="2" stroke-linecap="round"/>
+              <path class="flow-path" d="M500 310 L500 345" stroke="#fbbf24" stroke-width="2" stroke-linecap="round"/>
+              <path class="flow-path" d="M620 310 L620 345" stroke="#00e5a0" stroke-width="2" stroke-linecap="round"/>
+              <path class="flow-path" d="M500 415 L500 455" stroke="#00e5a0" stroke-width="2" stroke-linecap="round"/>
+              <path class="flow-path" d="M500 515 L500 545" stroke="#00e5a0" stroke-width="2" stroke-linecap="round"/>
+              <!-- Execute loop arrow -->
+              <path class="flow-path" d="M720 475 C760 475 760 495 720 495" stroke="rgba(0,229,160,0.4)" stroke-width="2" stroke-linecap="round" fill="none"/>
+            </g>
+
+            <!-- Node 1: Feature Idea -->
+            <g class="flow-node">
+              <rect x="380" y="30" width="240" height="45" rx="22" fill="none" stroke="#00e5a0" stroke-width="2"/>
+              <text x="500" y="58" text-anchor="middle" fill="#00e5a0" font-family="Clash Display, sans-serif" font-weight="600" font-size="15">Feature Idea</text>
+            </g>
+
+            <!-- Node 2: create-prd.mdc -->
+            <g class="flow-node">
+              <rect x="300" y="115" width="400" height="80" rx="12" fill="#111827" stroke="rgba(0,229,160,0.3)" stroke-width="1.5"/>
+              <text x="500" y="142" text-anchor="middle" fill="#00e5a0" font-family="Courier New, monospace" font-weight="700" font-size="14">create-prd.mdc</text>
+              <text x="500" y="165" text-anchor="middle" fill="#9ca3af" font-family="Satoshi, sans-serif" font-size="12">AI asks 3-5 questions   |   You answer   |   PRD generated</text>
+              <text x="500" y="183" text-anchor="middle" fill="rgba(0,229,160,0.5)" font-family="Courier New, monospace" font-size="11">saves to tasks/prd-[name].md</text>
+            </g>
+
+            <!-- Node 3: generate-tasks.mdc -->
+            <g class="flow-node">
+              <rect x="260" y="235" width="480" height="75" rx="12" fill="#111827" stroke="rgba(0,229,160,0.3)" stroke-width="1.5"/>
+              <text x="500" y="258" text-anchor="middle" fill="#00e5a0" font-family="Courier New, monospace" font-weight="700" font-size="14">generate-tasks.mdc</text>
+              <!-- Phase labels -->
+              <text x="380" y="280" text-anchor="middle" fill="#60a5fa" font-family="Satoshi, sans-serif" font-weight="600" font-size="11">Phase 1: Parents</text>
+              <text x="500" y="280" text-anchor="middle" fill="#fbbf24" font-family="Clash Display, sans-serif" font-weight="700" font-size="12">GO</text>
+              <text x="620" y="280" text-anchor="middle" fill="#00e5a0" font-family="Satoshi, sans-serif" font-weight="600" font-size="11">Phase 2: Subtasks</text>
+              <text x="500" y="299" text-anchor="middle" fill="rgba(0,229,160,0.5)" font-family="Courier New, monospace" font-size="11">saves to tasks/tasks-[name].md</text>
+            </g>
+
+            <!-- Phase detail nodes -->
+            <g class="flow-node">
+              <rect x="310" y="345" width="140" height="30" rx="6" fill="rgba(96,165,250,0.08)" stroke="rgba(96,165,250,0.2)" stroke-width="1"/>
+              <text x="380" y="365" text-anchor="middle" fill="#60a5fa" font-family="Satoshi, sans-serif" font-size="11">Review tasks</text>
+            </g>
+            <g class="flow-node">
+              <rect x="460" y="345" width="80" height="30" rx="6" fill="rgba(251,191,36,0.1)" stroke="rgba(251,191,36,0.25)" stroke-width="1"/>
+              <text x="500" y="365" text-anchor="middle" fill="#fbbf24" font-family="Clash Display, sans-serif" font-weight="700" font-size="12">GO</text>
+            </g>
+            <g class="flow-node">
+              <rect x="550" y="345" width="140" height="30" rx="6" fill="rgba(0,229,160,0.08)" stroke="rgba(0,229,160,0.2)" stroke-width="1"/>
+              <text x="620" y="365" text-anchor="middle" fill="#00e5a0" font-family="Satoshi, sans-serif" font-size="11">Expand subtasks</text>
+            </g>
+
+            <!-- Connecting paths between phase details -->
+            <path class="flow-path" d="M450 360 L460 360" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+            <path class="flow-path" d="M540 360 L550 360" stroke="rgba(255,255,255,0.15)" stroke-width="1.5" stroke-linecap="round"/>
+
+            <!-- Node 4: Execute loop -->
+            <g class="flow-node">
+              <rect x="300" y="455" width="400" height="60" rx="12" fill="#111827" stroke="rgba(0,229,160,0.3)" stroke-width="1.5"/>
+              <text x="500" y="478" text-anchor="middle" fill="#00e5a0" font-family="Clash Display, sans-serif" font-weight="600" font-size="14">Execute Loop</text>
+              <text x="500" y="500" text-anchor="middle" fill="#9ca3af" font-family="Satoshi, sans-serif" font-size="12">Read &#8594; Test &#8594; Implement &#8594; Run &#8594; Mark [x] &#8594; Commit</text>
+              <!-- Loop indicator -->
+              <text x="715" y="490" text-anchor="middle" fill="rgba(0,229,160,0.5)" font-family="Satoshi, sans-serif" font-size="18">&#8635;</text>
+            </g>
+
+            <!-- Node 5: PR + CI -->
+            <g class="flow-node">
+              <rect x="380" y="545" width="240" height="45" rx="22" fill="none" stroke="#00e5a0" stroke-width="2"/>
+              <text x="500" y="573" text-anchor="middle" fill="#00e5a0" font-family="Clash Display, sans-serif" font-weight="600" font-size="15">PR + CI</text>
+            </g>
+
+            <!-- Glow effects -->
+            <defs>
+              <filter id="glow">
+                <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+                <feMerge>
+                  <feMergeNode in="coloredBlur"/>
+                  <feMergeNode in="SourceGraphic"/>
+                </feMerge>
+              </filter>
+            </defs>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 11 — Failure Modes (2.10)
+       ==================================================== -->
+  <section class="slide" id="slide-10">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.10</span>
+        <h2>How Things Go Wrong</h2>
+        <p class="slide-subtitle">And how the system prevents it</p>
+      </div>
+      <div class="failure-cards stagger">
+        <div class="failure-card reveal">
+          <div class="failure-card-header">
+            <span class="failure-card-number">1</span>
+            <span class="failure-card-title">No PRD</span>
+          </div>
+          <div class="failure-card-body">AI builds the wrong thing. Assumptions everywhere. Discover misalignment after hours of work.</div>
+          <div class="failure-card-fix">create-prd forces spec-first thinking</div>
+        </div>
+        <div class="failure-card reveal">
+          <div class="failure-card-header">
+            <span class="failure-card-number">2</span>
+            <span class="failure-card-title">Tasks Too Big</span>
+          </div>
+          <div class="failure-card-body">AI loses context mid-task. Output quality degrades. Half-finished work that's hard to salvage.</div>
+          <div class="failure-card-fix">generate-tasks enforces small, focused chunks</div>
+        </div>
+        <div class="failure-card reveal">
+          <div class="failure-card-header">
+            <span class="failure-card-number">3</span>
+            <span class="failure-card-title">No Checkpoint</span>
+          </div>
+          <div class="failure-card-body">One bad task cascades. No clear rollback point. Everything is tangled together.</div>
+          <div class="failure-card-fix">Checkbox tracking + atomic commit per task</div>
+        </div>
+        <div class="failure-card reveal">
+          <div class="failure-card-header">
+            <span class="failure-card-number">4</span>
+            <span class="failure-card-title">No Tests</span>
+          </div>
+          <div class="failure-card-body">Can't verify if anything actually works. Bugs hide until production. No confidence to ship.</div>
+          <div class="failure-card-fix">Test-first culture baked into task execution</div>
+        </div>
+        <div class="failure-card reveal">
+          <div class="failure-card-header">
+            <span class="failure-card-number">5</span>
+            <span class="failure-card-title">Wrong Direction</span>
+          </div>
+          <div class="failure-card-body">Wasted effort building the wrong architecture. Days lost before anyone notices.</div>
+          <div class="failure-card-fix">Two-phase "Go" gate catches it early</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 12 — Live Demo (2.11)
+       ==================================================== -->
+  <section class="slide" id="slide-11">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 2.11</span>
+        <h2>Let's Build Something</h2>
+      </div>
+      <div class="reveal">
+        <div class="demo-feature">
+          <div class="demo-feature-label">Demo Feature</div>
+          <div class="demo-feature-name">"Add a health check endpoint to the product service"</div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="demo-timeline">
+          <div class="demo-step" data-step="1">
+            <div class="demo-step-title">PRD Generation</div>
+            <div class="demo-step-desc">Open a terminal and start Claude Code. Tell it to read the rule file and create a PRD for the health check endpoint.</div>
+            <div class="demo-cmd"><span class="demo-cmd-prompt">$ </span>cd marketplace-ai-workshop && claude</div>
+            <div class="demo-cmd"><span class="demo-cmd-prompt">&gt; </span>Read .cursor/rules/create-prd.mdc and use it to create a PRD &mdash; I want to add a health check endpoint to the product service</div>
+            <div class="demo-step-desc" style="margin-top:8px;">AI asks 3&ndash;5 clarifying questions &rarr; answer "1B, 2B, 3A" &rarr; structured PRD saved to <code style="color:var(--accent);">tasks/prd-health-check.md</code></div>
+            <div class="demo-step-time">~10 min</div>
+          </div>
+          <div class="demo-step" data-step="2">
+            <div class="demo-step-title">Task Generation &mdash; Phase 1</div>
+            <div class="demo-step-desc">Feed the PRD into the task generator. AI produces parent tasks only, then stops.</div>
+            <div class="demo-cmd"><span class="demo-cmd-prompt">&gt; </span>Read .cursor/rules/generate-tasks.mdc and use it to create tasks from tasks/prd-health-check.md</div>
+            <div class="demo-step-desc" style="margin-top:8px;">Parent tasks: 0.0 Create branch, 1.0 Health check endpoint, 2.0 DB connectivity check, 3.0 Response format &amp; docs. AI waits for "Go".</div>
+            <div class="demo-step-time">~5 min</div>
+          </div>
+          <div class="demo-step" data-step="3">
+            <div class="demo-step-title">Task Generation &mdash; Phase 2</div>
+            <div class="demo-step-desc">Review parent tasks, say "Go". Subtasks expand with checkbox format, relevant files, and execution instructions. Saved to <code style="color:var(--accent);">tasks/tasks-health-check.md</code></div>
+            <div class="demo-step-time">~5 min</div>
+          </div>
+          <div class="demo-step" data-step="4">
+            <div class="demo-step-title">Execute First Task</div>
+            <div class="demo-step-desc">
+              "Start on task 1.1" &rarr; AI reads existing schemas &rarr; writes test for health check response schema &rarr; test fails &rarr; implements TypeScript interface &rarr; test passes &rarr; marks <code style="color:var(--accent);">- [x]</code> &rarr; commits: <code style="color:var(--accent);">feat(health): add health check response schema</code>
+            </div>
+            <div class="demo-step-time">~15 min</div>
+          </div>
+          <div class="demo-step" data-step="5">
+            <div class="demo-step-title">The Failure Demo</div>
+            <div class="demo-step-desc">
+              Take a bigger feature: <strong style="color:var(--red-tint);">"Add product search with filters"</strong>. Paste it directly into AI chat with NO system, NO PRD, NO task breakdown. Result: massive single file, missing edge cases, no tests, wrong assumptions, hallucinated imports.
+            </div>
+            <div class="demo-contrast">
+              <div class="demo-contrast-card demo-contrast-card--good">
+                <div class="demo-contrast-label">With the system</div>
+                Even a trivial health check got a proper spec, tests, and clean commits.
+              </div>
+              <div class="demo-contrast-card demo-contrast-card--bad">
+                <div class="demo-contrast-label">Without the system</div>
+                A complex feature got chaos. Same AI. Same engineer. Only difference: quality of instructions.
+              </div>
+            </div>
+            <div class="demo-step-time">~10 min</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       JavaScript — SlidePresentation controller
+       ========================================================= -->
+  <script>
+    class SlidePresentation {
+      constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.dots = document.querySelectorAll('.nav-dot');
+        this.progressBar = document.getElementById('progressBar');
+        this.currentSlide = 0;
+        this.totalSlides = this.slides.length;
+        this.isScrolling = false;
+        this.touchStartY = 0;
+        this.touchStartX = 0;
+
+        this.init();
+      }
+
+      init() {
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupDotNav();
+        this.updateProgress();
+      }
+
+      /* ----- IntersectionObserver for reveal animations ----- */
+      setupIntersectionObserver() {
+        const revealObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+              }
+            });
+          },
+          { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+        );
+
+        document.querySelectorAll('.reveal').forEach((el) => {
+          revealObserver.observe(el);
+        });
+
+        /* Slide tracking for nav dots + progress */
+        const slideObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
+                const idx = Array.from(this.slides).indexOf(entry.target);
+                if (idx !== -1) {
+                  this.currentSlide = idx;
+                  this.updateDots();
+                  this.updateProgress();
+                }
+              }
+            });
+          },
+          { threshold: 0.5 }
+        );
+
+        this.slides.forEach((s) => slideObserver.observe(s));
+
+        /* Flow diagram animation trigger */
+        const flowDiagram = document.getElementById('flowDiagram');
+        if (flowDiagram) {
+          const flowObserver = new IntersectionObserver(
+            (entries) => {
+              entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                  entry.target.classList.add('in-view');
+                }
+              });
+            },
+            { threshold: 0.3 }
+          );
+          flowObserver.observe(flowDiagram);
+        }
+      }
+
+      /* ----- Keyboard navigation ----- */
+      setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+          switch (e.key) {
+            case 'ArrowDown':
+            case 'ArrowRight':
+            case ' ':
+            case 'PageDown':
+              e.preventDefault();
+              this.goToSlide(Math.min(this.currentSlide + 1, this.totalSlides - 1));
+              break;
+            case 'ArrowUp':
+            case 'ArrowLeft':
+            case 'PageUp':
+              e.preventDefault();
+              this.goToSlide(Math.max(this.currentSlide - 1, 0));
+              break;
+            case 'Home':
+              e.preventDefault();
+              this.goToSlide(0);
+              break;
+            case 'End':
+              e.preventDefault();
+              this.goToSlide(this.totalSlides - 1);
+              break;
+          }
+        });
+      }
+
+      /* ----- Touch / Swipe ----- */
+      setupTouchNav() {
+        document.addEventListener('touchstart', (e) => {
+          this.touchStartY = e.changedTouches[0].screenY;
+          this.touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+          const deltaY = this.touchStartY - e.changedTouches[0].screenY;
+          const deltaX = this.touchStartX - e.changedTouches[0].screenX;
+
+          /* Only respond to primarily vertical swipes */
+          if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
+            if (deltaY > 0) {
+              this.goToSlide(Math.min(this.currentSlide + 1, this.totalSlides - 1));
+            } else {
+              this.goToSlide(Math.max(this.currentSlide - 1, 0));
+            }
+          }
+        }, { passive: true });
+      }
+
+      /* ----- Dot navigation ----- */
+      setupDotNav() {
+        this.dots.forEach((dot) => {
+          dot.addEventListener('click', () => {
+            const idx = parseInt(dot.dataset.slide, 10);
+            this.goToSlide(idx);
+          });
+        });
+      }
+
+      /* ----- Navigation ----- */
+      goToSlide(idx) {
+        if (idx < 0 || idx >= this.totalSlides) return;
+        this.slides[idx].scrollIntoView({ behavior: 'smooth' });
+        this.currentSlide = idx;
+        this.updateDots();
+        this.updateProgress();
+      }
+
+      /* ----- UI Updates ----- */
+      updateDots() {
+        this.dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === this.currentSlide);
+        });
+      }
+
+      updateProgress() {
+        const pct = this.totalSlides > 1
+          ? (this.currentSlide / (this.totalSlides - 1)) * 100
+          : 0;
+        this.progressBar.style.width = pct + '%';
+      }
+    }
+
+    /* Boot */
+    document.addEventListener('DOMContentLoaded', () => {
+      new SlidePresentation();
+    });
+  </script>
+</body>
+</html>

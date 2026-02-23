@@ -26,21 +26,39 @@ All generated PRDs must reflect these project conventions in their Technical Req
 
 ## Step 1: Ask Clarifying Questions
 
-Before writing anything, use the `AskUserQuestion` tool to ask clarifying questions. Ask up to 4 questions at a time (the tool's limit). Each question should have 2-4 options with clear labels and descriptions.
+Before writing anything, ask me these questions. Number each question and provide lettered options so I can respond quickly (e.g. "1A, 2C, 3B, 4 — custom answer").
 
-Questions to ask (adapt based on the user's initial prompt — skip any that are already answered):
+1. **What is the feature?**
+   a) [Suggest based on context]
+   b) [Suggest based on context]
+   c) Something else (I'll describe)
 
-**Batch 1:**
-1. **What is the feature?** — Suggest 2-3 options based on context, plus "Something else"
-2. **Who uses it?** — Options: Buyer, Seller, Both buyer and seller, Admin
-3. **What exists today?** — Options: Greenfield (nothing exists), Replacing existing feature, Extending existing feature
-4. **What's the one thing this must do to be considered done?** — Suggest 2-3 options based on context
+2. **Who uses it?**
+   a) Buyer
+   b) Seller
+   c) Both buyer and seller
+   d) Admin
 
-**Batch 2 (if needed):**
-5. **Are there hard constraints?** — Options: No hard constraints, Yes (I'll describe)
-6. **What's explicitly out of scope?** — Suggest 2-3 options based on context
+3. **What exists today?**
+   a) Greenfield — nothing exists yet
+   b) Replacing an existing feature
+   c) Extending an existing feature
 
-If answers are vague, use `AskUserQuestion` again to push back and clarify. A vague PRD produces vague code.
+4. **What's the one thing this must do to be considered done?**
+   a) [Suggest based on context]
+   b) [Suggest based on context]
+   c) Something else (I'll describe)
+
+5. **Are there hard constraints?** (performance SLAs, third-party API limits, deadlines)
+   a) No hard constraints
+   b) Yes (I'll describe)
+
+6. **What's explicitly out of scope?** (name at least one thing you've been tempted to include)
+   a) [Suggest based on context]
+   b) [Suggest based on context]
+   c) Something else (I'll describe)
+
+Wait for my answers. If my answers are vague, push back. A vague PRD produces vague code.
 
 ## Step 2: Generate the PRD
 

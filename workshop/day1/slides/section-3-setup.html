@@ -1,0 +1,1641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Section 3 — Setup & First Hands-On | AI Development Workshop</title>
+
+  <!-- Fontshare: Clash Display + Satoshi -->
+  <link rel="stylesheet" href="https://api.fontshare.com/v2/css?f[]=clash-display@400;500;600;700&f[]=satoshi@400;500;700&display=swap">
+
+  <style>
+    /* =========================================================
+       CSS Custom Properties — Shared theme tokens
+       ========================================================= */
+    :root {
+      /* Palette */
+      --bg-primary: #0a0f1c;
+      --bg-secondary: #111827;
+      --accent: #00e5a0;
+      --accent-glow: rgba(0, 229, 160, 0.3);
+      --accent-dim: rgba(0, 229, 160, 0.12);
+      --text-primary: #ffffff;
+      --text-secondary: #9ca3af;
+      --red-tint: #ff6b6b;
+      --red-bg: rgba(255, 107, 107, 0.08);
+      --yellow-tint: #fbbf24;
+      --yellow-bg: rgba(251, 191, 36, 0.08);
+      --green-tint: #00e5a0;
+      --green-bg: rgba(0, 229, 160, 0.08);
+      --blue-tint: #60a5fa;
+      --blue-bg: rgba(96, 165, 250, 0.08);
+      --purple-tint: #a78bfa;
+      --purple-bg: rgba(167, 139, 250, 0.08);
+
+      /* Typography */
+      --font-heading: 'Clash Display', sans-serif;
+      --font-body: 'Satoshi', sans-serif;
+      --font-mono: 'SF Mono', 'Fira Code', 'Cascadia Code', 'Consolas', monospace;
+
+      /* Spacing */
+      --slide-padding: 80px;
+
+      /* Animation */
+      --reveal-duration: 0.7s;
+      --reveal-stagger: 0.12s;
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    /* =========================================================
+       Reset & Base
+       ========================================================= */
+    *, *::before, *::after {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+      scroll-snap-type: y mandatory;
+      overflow-y: scroll;
+      overflow-x: hidden;
+    }
+
+    body {
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      font-family: var(--font-body);
+      font-size: 18px;
+      line-height: 1.6;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    /* Subtle grid background */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 60px 60px;
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* =========================================================
+       Progress Bar (top)
+       ========================================================= */
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 12px var(--accent-glow);
+      z-index: 1000;
+      transition: width 0.35s var(--ease-out);
+      width: 0%;
+    }
+
+    /* =========================================================
+       Navigation Dots (right side)
+       ========================================================= */
+    .nav-dots {
+      position: fixed;
+      right: 28px;
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex;
+      flex-direction: column;
+      gap: 14px;
+      z-index: 1000;
+    }
+
+    .nav-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.15);
+      border: none;
+      cursor: pointer;
+      transition: all 0.3s var(--ease-out);
+      position: relative;
+    }
+
+    .nav-dot:hover {
+      background: rgba(255, 255, 255, 0.4);
+      transform: scale(1.3);
+    }
+
+    .nav-dot.active {
+      background: var(--accent);
+      box-shadow: 0 0 10px var(--accent-glow);
+      transform: scale(1.2);
+    }
+
+    /* Tooltip on hover */
+    .nav-dot::after {
+      content: attr(data-label);
+      position: absolute;
+      right: 22px;
+      top: 50%;
+      transform: translateY(-50%);
+      background: var(--bg-secondary);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-family: var(--font-body);
+      padding: 4px 10px;
+      border-radius: 4px;
+      white-space: nowrap;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.2s;
+    }
+
+    .nav-dot:hover::after {
+      opacity: 1;
+    }
+
+    /* =========================================================
+       Slide Base
+       ========================================================= */
+    .slide {
+      min-height: 100vh;
+      scroll-snap-align: start;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: var(--slide-padding);
+      position: relative;
+      z-index: 1;
+    }
+
+    .slide-inner {
+      max-width: 1100px;
+      width: 100%;
+    }
+
+    /* =========================================================
+       Typography
+       ========================================================= */
+    h1, h2, h3 {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      line-height: 1.15;
+    }
+
+    .slide-number {
+      font-family: var(--font-body);
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      margin-bottom: 16px;
+    }
+
+    /* =========================================================
+       Reveal Animations
+       ========================================================= */
+    .reveal {
+      opacity: 0;
+      transform: translateY(32px);
+      transition:
+        opacity var(--reveal-duration) var(--ease-out),
+        transform var(--reveal-duration) var(--ease-out);
+    }
+
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* Stagger children */
+    .stagger > .reveal:nth-child(1) { transition-delay: calc(var(--reveal-stagger) * 0); }
+    .stagger > .reveal:nth-child(2) { transition-delay: calc(var(--reveal-stagger) * 1); }
+    .stagger > .reveal:nth-child(3) { transition-delay: calc(var(--reveal-stagger) * 2); }
+    .stagger > .reveal:nth-child(4) { transition-delay: calc(var(--reveal-stagger) * 3); }
+    .stagger > .reveal:nth-child(5) { transition-delay: calc(var(--reveal-stagger) * 4); }
+    .stagger > .reveal:nth-child(6) { transition-delay: calc(var(--reveal-stagger) * 5); }
+    .stagger > .reveal:nth-child(7) { transition-delay: calc(var(--reveal-stagger) * 6); }
+    .stagger > .reveal:nth-child(8) { transition-delay: calc(var(--reveal-stagger) * 7); }
+    .stagger > .reveal:nth-child(9) { transition-delay: calc(var(--reveal-stagger) * 8); }
+    .stagger > .reveal:nth-child(10) { transition-delay: calc(var(--reveal-stagger) * 9); }
+
+    /* Reduced motion */
+    @media (prefers-reduced-motion: reduce) {
+      .reveal {
+        opacity: 1;
+        transform: none;
+        transition: none;
+      }
+      html {
+        scroll-behavior: auto;
+      }
+    }
+
+    /* =========================================================
+       SLIDE 1 — Title Slide
+       ========================================================= */
+    .title-slide {
+      text-align: center;
+    }
+
+    .title-slide h1 {
+      font-size: clamp(3rem, 8vw, 6rem);
+      background: linear-gradient(135deg, var(--text-primary) 0%, var(--accent) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 20px;
+    }
+
+    .title-slide .subtitle {
+      font-size: clamp(1.1rem, 2.5vw, 1.5rem);
+      color: var(--text-secondary);
+      font-weight: 400;
+      margin-bottom: 12px;
+    }
+
+    .title-slide .workshop-label {
+      font-size: 14px;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      font-weight: 500;
+    }
+
+    .title-slide .accent-line {
+      width: 80px;
+      height: 3px;
+      background: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+      margin: 28px auto;
+      border-radius: 2px;
+    }
+
+    /* =========================================================
+       Heading styles shared across slides
+       ========================================================= */
+    .slide h2 {
+      font-size: clamp(2rem, 4vw, 3rem);
+      margin-bottom: 8px;
+    }
+
+    .slide .slide-subtitle {
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      margin-bottom: 6px;
+    }
+
+    /* =========================================================
+       SLIDE 2 — Tool Comparison Cards
+       ========================================================= */
+    .tool-cards {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 36px;
+    }
+
+    .tool-card {
+      padding: 36px 32px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--bg-secondary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .tool-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .tool-card--cursor::before {
+      background: var(--blue-tint);
+      box-shadow: 0 0 20px rgba(96, 165, 250, 0.3);
+    }
+
+    .tool-card--claude::before {
+      background: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .tool-card-title {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.5rem;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .tool-card--cursor .tool-card-title { color: var(--blue-tint); }
+    .tool-card--claude .tool-card-title { color: var(--accent); }
+
+    .tool-card-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .tool-card--cursor .tool-card-icon {
+      background: rgba(96, 165, 250, 0.15);
+      color: var(--blue-tint);
+    }
+
+    .tool-card--claude .tool-card-icon {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .tool-card-rows {
+      list-style: none;
+    }
+
+    .tool-card-rows li {
+      display: flex;
+      padding: 10px 0;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.95rem;
+    }
+
+    .tool-card-rows li:last-child {
+      border-bottom: none;
+    }
+
+    .tool-card-label {
+      color: var(--text-secondary);
+      width: 110px;
+      flex-shrink: 0;
+      font-size: 0.82rem;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      font-weight: 600;
+      padding-top: 2px;
+    }
+
+    .tool-card-value {
+      color: var(--text-primary);
+      flex: 1;
+    }
+
+    .complementary-note {
+      margin-top: 32px;
+      padding: 20px 28px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border-left: 3px solid var(--accent);
+      font-size: 1.05rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .complementary-note strong {
+      color: var(--text-primary);
+    }
+
+    /* =========================================================
+       SLIDE 3 — Two Columns (Changes / Stays)
+       ========================================================= */
+    .shift-columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 32px;
+      margin-top: 36px;
+    }
+
+    .shift-column {
+      padding: 32px 28px;
+      border-radius: 16px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .shift-column--changes {
+      background: linear-gradient(135deg, var(--bg-secondary), rgba(0, 229, 160, 0.04));
+      border-color: rgba(0, 229, 160, 0.12);
+    }
+
+    .shift-column--stays {
+      background: linear-gradient(135deg, var(--bg-secondary), rgba(96, 165, 250, 0.04));
+      border-color: rgba(96, 165, 250, 0.12);
+    }
+
+    .shift-column-header {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.2rem;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .shift-column--changes .shift-column-header { color: var(--accent); }
+    .shift-column--stays .shift-column-header { color: var(--blue-tint); }
+
+    .shift-column-icon {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+      font-weight: 700;
+      flex-shrink: 0;
+    }
+
+    .shift-column--changes .shift-column-icon {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .shift-column--stays .shift-column-icon {
+      background: rgba(96, 165, 250, 0.12);
+      color: var(--blue-tint);
+    }
+
+    .shift-list {
+      list-style: none;
+    }
+
+    .shift-list li {
+      padding: 10px 0 10px 20px;
+      font-size: 1rem;
+      color: var(--text-primary);
+      position: relative;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+    }
+
+    .shift-list li:last-child {
+      border-bottom: none;
+    }
+
+    .shift-list li::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 18px;
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+    }
+
+    .shift-column--changes .shift-list li::before {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent-glow);
+    }
+
+    .shift-column--stays .shift-list li::before {
+      background: var(--blue-tint);
+      box-shadow: 0 0 8px rgba(96, 165, 250, 0.3);
+    }
+
+    /* =========================================================
+       SLIDE 4 — Terminal / Code Blocks
+       ========================================================= */
+    .setup-steps {
+      margin-top: 32px;
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+    }
+
+    .setup-step {
+      background: var(--bg-secondary);
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      overflow: hidden;
+    }
+
+    .setup-step-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 14px 20px;
+      background: rgba(255, 255, 255, 0.02);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+    }
+
+    .step-badge {
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 12px;
+      padding: 3px 10px;
+      border-radius: 100px;
+      letter-spacing: 0.05em;
+    }
+
+    .step-title {
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: var(--text-primary);
+    }
+
+    .terminal-block {
+      padding: 18px 22px;
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      overflow-x: auto;
+    }
+
+    .terminal-block .prompt {
+      color: var(--accent);
+      user-select: none;
+    }
+
+    .terminal-block .cmd {
+      color: var(--text-primary);
+    }
+
+    .terminal-block .comment {
+      color: rgba(255, 255, 255, 0.3);
+    }
+
+    .terminal-block .url {
+      color: var(--blue-tint);
+      text-decoration: underline;
+      text-decoration-color: rgba(96, 165, 250, 0.3);
+    }
+
+    /* Tree structure */
+    .tree-block {
+      padding: 18px 22px;
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      line-height: 1.8;
+      color: var(--text-secondary);
+    }
+
+    .tree-block .folder {
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .tree-block .file {
+      color: var(--text-primary);
+    }
+
+    .tree-block .tree-comment {
+      color: rgba(255, 255, 255, 0.3);
+      font-style: italic;
+    }
+
+    /* =========================================================
+       SLIDE 5 — First Task (Option paths + walk-through)
+       ========================================================= */
+    .option-paths {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 28px;
+      margin-top: 32px;
+    }
+
+    .option-card {
+      padding: 28px 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--bg-secondary);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .option-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 3px;
+    }
+
+    .option-card--a::before {
+      background: var(--blue-tint);
+      box-shadow: 0 0 16px rgba(96, 165, 250, 0.3);
+    }
+
+    .option-card--b::before {
+      background: var(--accent);
+      box-shadow: 0 0 16px var(--accent-glow);
+    }
+
+    .option-label {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.15rem;
+      margin-bottom: 16px;
+    }
+
+    .option-card--a .option-label { color: var(--blue-tint); }
+    .option-card--b .option-label { color: var(--accent); }
+
+    .option-steps {
+      list-style: none;
+      counter-reset: option-step;
+    }
+
+    .option-steps li {
+      counter-increment: option-step;
+      padding: 8px 0 8px 28px;
+      font-size: 0.88rem;
+      color: var(--text-secondary);
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .option-steps li::before {
+      content: counter(option-step);
+      position: absolute;
+      left: 0;
+      top: 8px;
+      width: 20px;
+      height: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      font-weight: 700;
+      border-radius: 50%;
+    }
+
+    .option-card--a .option-steps li::before {
+      background: rgba(96, 165, 250, 0.15);
+      color: var(--blue-tint);
+    }
+
+    .option-card--b .option-steps li::before {
+      background: var(--accent-dim);
+      color: var(--accent);
+    }
+
+    .option-steps code {
+      font-family: var(--font-mono);
+      font-size: 0.82rem;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 6px;
+      border-radius: 4px;
+      color: var(--text-primary);
+    }
+
+    .walkthrough-section {
+      margin-top: 36px;
+    }
+
+    .walkthrough-title {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.1rem;
+      color: var(--text-primary);
+      margin-bottom: 18px;
+    }
+
+    .walkthrough-steps {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+    }
+
+    .walkthrough-step {
+      padding: 20px 16px;
+      border-radius: 12px;
+      background: var(--bg-secondary);
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      text-align: center;
+    }
+
+    .walkthrough-step-num {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 1.6rem;
+      color: var(--accent);
+      margin-bottom: 8px;
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .walkthrough-step-text {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.5;
+    }
+
+    /* =========================================================
+       SLIDE 6 — Troubleshooting Table
+       ========================================================= */
+    .trouble-table {
+      margin-top: 32px;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .trouble-table thead th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 14px 20px;
+      text-align: left;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.9rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .trouble-table tbody td {
+      padding: 14px 20px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      vertical-align: top;
+    }
+
+    .trouble-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .trouble-table tbody tr {
+      background: var(--bg-secondary);
+      transition: background 0.2s;
+    }
+
+    .trouble-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .trouble-issue {
+      color: var(--red-tint);
+      font-weight: 600;
+    }
+
+    .trouble-fix {
+      color: var(--text-secondary);
+    }
+
+    .trouble-fix code {
+      font-family: var(--font-mono);
+      font-size: 0.8rem;
+      background: rgba(255, 255, 255, 0.06);
+      padding: 2px 8px;
+      border-radius: 4px;
+      color: var(--text-primary);
+      display: inline-block;
+      margin-top: 2px;
+    }
+
+    /* =========================================================
+       SLIDE 7 — Task Cards (Exploration)
+       ========================================================= */
+    .explore-cards {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      margin-top: 36px;
+    }
+
+    .explore-card {
+      padding: 32px 24px;
+      border-radius: 14px;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      background: var(--bg-secondary);
+      transition: border-color 0.3s, box-shadow 0.3s, transform 0.3s;
+    }
+
+    .explore-card:hover {
+      border-color: var(--accent-dim);
+      box-shadow: 0 0 32px rgba(0, 229, 160, 0.06);
+      transform: translateY(-4px);
+    }
+
+    .explore-card-num {
+      font-family: var(--font-heading);
+      font-weight: 700;
+      font-size: 2rem;
+      color: var(--accent);
+      margin-bottom: 12px;
+      text-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .explore-card-title {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.05rem;
+      color: var(--text-primary);
+      margin-bottom: 10px;
+    }
+
+    .explore-card-desc {
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .timing-note {
+      margin-top: 32px;
+      padding: 18px 24px;
+      background: var(--bg-secondary);
+      border-radius: 12px;
+      border-left: 3px solid var(--yellow-tint);
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      line-height: 1.7;
+    }
+
+    .timing-note strong {
+      color: var(--yellow-tint);
+    }
+
+    /* =========================================================
+       SLIDE 8 — Morning Summary Table
+       ========================================================= */
+    .summary-table {
+      margin-top: 32px;
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      border-radius: 14px;
+      overflow: hidden;
+      border: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .summary-table thead th {
+      background: rgba(255, 255, 255, 0.04);
+      padding: 14px 18px;
+      text-align: left;
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 0.85rem;
+      color: var(--accent);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .summary-table tbody td {
+      padding: 14px 18px;
+      font-size: 0.9rem;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+      color: var(--text-secondary);
+    }
+
+    .summary-table tbody tr:last-child td {
+      border-bottom: none;
+    }
+
+    .summary-table tbody tr {
+      background: var(--bg-secondary);
+      transition: background 0.2s;
+    }
+
+    .summary-table tbody tr:hover {
+      background: rgba(255, 255, 255, 0.03);
+    }
+
+    .summary-table .section-name {
+      color: var(--text-primary);
+      font-weight: 600;
+    }
+
+    .summary-table .time-col {
+      color: var(--accent);
+      font-family: var(--font-mono);
+      font-size: 0.85rem;
+    }
+
+    .summary-table .duration-col {
+      color: var(--text-primary);
+    }
+
+    .summary-table .flex-col {
+      font-size: 0.85rem;
+    }
+
+    .check-questions {
+      margin-top: 36px;
+    }
+
+    .check-questions-title {
+      font-family: var(--font-heading);
+      font-weight: 600;
+      font-size: 1.15rem;
+      color: var(--text-primary);
+      margin-bottom: 18px;
+    }
+
+    .check-list {
+      list-style: none;
+    }
+
+    .check-list li {
+      padding: 14px 20px 14px 48px;
+      margin-bottom: 10px;
+      background: var(--bg-secondary);
+      border-radius: 10px;
+      border: 1px solid rgba(255, 255, 255, 0.04);
+      font-size: 0.95rem;
+      color: var(--text-secondary);
+      position: relative;
+      line-height: 1.5;
+    }
+
+    .check-list li::before {
+      content: '?';
+      position: absolute;
+      left: 16px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: var(--accent-dim);
+      color: var(--accent);
+      font-weight: 700;
+      font-size: 13px;
+      border-radius: 50%;
+    }
+
+    .check-list li:hover {
+      border-color: var(--accent-dim);
+      box-shadow: 0 0 24px rgba(0, 229, 160, 0.06);
+    }
+
+    /* =========================================================
+       Mobile responsive
+       ========================================================= */
+    @media (max-width: 768px) {
+      :root {
+        --slide-padding: 32px 20px;
+      }
+
+      .nav-dots {
+        right: 12px;
+        gap: 10px;
+      }
+
+      .nav-dot {
+        width: 8px;
+        height: 8px;
+      }
+
+      .nav-dot::after {
+        display: none;
+      }
+
+      .tool-cards,
+      .shift-columns,
+      .option-paths {
+        grid-template-columns: 1fr;
+        gap: 20px;
+      }
+
+      .explore-cards {
+        grid-template-columns: 1fr;
+        gap: 16px;
+      }
+
+      .walkthrough-steps {
+        grid-template-columns: 1fr 1fr;
+        gap: 12px;
+      }
+
+      .trouble-table,
+      .summary-table {
+        font-size: 0.82rem;
+      }
+
+      .trouble-table thead th,
+      .trouble-table tbody td,
+      .summary-table thead th,
+      .summary-table tbody td {
+        padding: 10px 12px;
+      }
+
+      .terminal-block {
+        font-size: 0.75rem;
+      }
+
+      .tree-block {
+        font-size: 0.72rem;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .title-slide h1 {
+        font-size: 2.4rem;
+      }
+
+      .walkthrough-steps {
+        grid-template-columns: 1fr;
+      }
+
+      .tool-card-label {
+        width: 80px;
+        font-size: 0.75rem;
+      }
+
+      .option-steps li {
+        font-size: 0.82rem;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Progress bar -->
+  <div class="progress-bar" id="progressBar"></div>
+
+  <!-- Navigation dots -->
+  <nav class="nav-dots" id="navDots">
+    <button class="nav-dot active" data-slide="0" data-label="Title" aria-label="Go to Title slide"></button>
+    <button class="nav-dot" data-slide="1" data-label="Tool Comparison" aria-label="Go to Tool Comparison slide"></button>
+    <button class="nav-dot" data-slide="2" data-label="The Shift" aria-label="Go to The Shift slide"></button>
+    <button class="nav-dot" data-slide="3" data-label="Setup" aria-label="Go to Setup slide"></button>
+    <button class="nav-dot" data-slide="4" data-label="First Task" aria-label="Go to First Task slide"></button>
+    <button class="nav-dot" data-slide="5" data-label="Troubleshooting" aria-label="Go to Troubleshooting slide"></button>
+    <button class="nav-dot" data-slide="6" data-label="Exploration" aria-label="Go to Exploration slide"></button>
+    <button class="nav-dot" data-slide="7" data-label="Summary" aria-label="Go to Summary slide"></button>
+  </nav>
+
+  <!-- ====================================================
+       SLIDE 1 — Title
+       ==================================================== -->
+  <section class="slide title-slide" id="slide-0">
+    <div class="slide-inner" style="text-align:center;">
+      <div class="reveal">
+        <p class="workshop-label" style="margin-bottom:24px;">AI Development Workshop</p>
+      </div>
+      <div class="reveal">
+        <h1>Setup &amp; First Hands-On</h1>
+      </div>
+      <div class="reveal">
+        <div class="accent-line"></div>
+      </div>
+      <div class="reveal">
+        <p class="subtitle">Section 3 &mdash; 11:15&ndash;12:30</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 2 — Tool Comparison (3.1)
+       ==================================================== -->
+  <section class="slide" id="slide-1">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 3.1</span>
+        <h2>Brief Tool Comparison</h2>
+      </div>
+      <div class="tool-cards">
+        <div class="tool-card tool-card--cursor reveal">
+          <div class="tool-card-title">
+            <span class="tool-card-icon">C</span>
+            Cursor
+          </div>
+          <ul class="tool-card-rows">
+            <li>
+              <span class="tool-card-label">Interface</span>
+              <span class="tool-card-value">IDE (VS Code fork)</span>
+            </li>
+            <li>
+              <span class="tool-card-label">Best for</span>
+              <span class="tool-card-value">Inline completions, "write this function"</span>
+            </li>
+            <li>
+              <span class="tool-card-label">Context</span>
+              <span class="tool-card-value">Good, IDE-aware</span>
+            </li>
+            <li>
+              <span class="tool-card-label">Workflow</span>
+              <span class="tool-card-value">You write, AI assists</span>
+            </li>
+            <li>
+              <span class="tool-card-label">Learning</span>
+              <span class="tool-card-value">Low (feels like VS Code)</span>
+            </li>
+          </ul>
+        </div>
+        <div class="tool-card tool-card--claude reveal">
+          <div class="tool-card-title">
+            <span class="tool-card-icon">&#9002;</span>
+            Claude Code
+          </div>
+          <ul class="tool-card-rows">
+            <li>
+              <span class="tool-card-label">Interface</span>
+              <span class="tool-card-value">CLI / Terminal</span>
+            </li>
+            <li>
+              <span class="tool-card-label">Best for</span>
+              <span class="tool-card-value">Autonomous multi-file work, agentic workflow</span>
+            </li>
+            <li>
+              <span class="tool-card-label">Context</span>
+              <span class="tool-card-value">Large, handles full project context</span>
+            </li>
+            <li>
+              <span class="tool-card-label">Workflow</span>
+              <span class="tool-card-value">You instruct, AI builds</span>
+            </li>
+            <li>
+              <span class="tool-card-label">Learning</span>
+              <span class="tool-card-value">Medium (terminal-first)</span>
+            </li>
+          </ul>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="complementary-note">
+          <strong>Complementary, not competing.</strong> The AI Dev Tasks workflow works in both tools &mdash; <code style="font-family:var(--font-mono);font-size:0.85rem;background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;">.cursor/rules/</code> files work in Cursor, and the same <code style="font-family:var(--font-mono);font-size:0.85rem;background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;">.md</code> files can be referenced in Claude Code.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 3 — The Shift (3.2)
+       ==================================================== -->
+  <section class="slide" id="slide-2">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 3.2</span>
+        <h2>What Changes, What Stays</h2>
+      </div>
+      <div class="shift-columns">
+        <div class="shift-column shift-column--changes reveal">
+          <div class="shift-column-header">
+            <span class="shift-column-icon">&#8593;</span>
+            What Changes
+          </div>
+          <ul class="shift-list">
+            <li>You think in features and tasks, not lines of code</li>
+            <li>You write specs before you write code</li>
+            <li>AI works through a structured task list, not ad hoc requests</li>
+            <li>Your IDE becomes primarily a code review tool</li>
+          </ul>
+        </div>
+        <div class="shift-column shift-column--stays reveal">
+          <div class="shift-column-header">
+            <span class="shift-column-icon">&#8853;</span>
+            What Stays the Same
+          </div>
+          <ul class="shift-list">
+            <li>You still review every line of AI output</li>
+            <li>You still own all architectural decisions</li>
+            <li>You still debug when things go wrong</li>
+            <li>You still need to understand the code deeply</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 4 — Setup (3.3)
+       ==================================================== -->
+  <section class="slide" id="slide-3">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 3.3</span>
+        <h2>Let's Get You Set Up</h2>
+      </div>
+      <div class="setup-steps">
+        <!-- Step 1 -->
+        <div class="setup-step reveal">
+          <div class="setup-step-header">
+            <span class="step-badge">Step 1</span>
+            <span class="step-title">Clone the workshop repo</span>
+          </div>
+          <div class="terminal-block">
+            <span class="prompt">$ </span><span class="cmd">git clone https://github.com/hodisr/marketplace-ai-workshop.git</span><br>
+            <span class="prompt">$ </span><span class="cmd">cd marketplace-ai-workshop</span>
+          </div>
+        </div>
+        <!-- Step 2 -->
+        <div class="setup-step reveal">
+          <div class="setup-step-header">
+            <span class="step-badge">Step 2</span>
+            <span class="step-title">Start the environment</span>
+          </div>
+          <div class="terminal-block">
+            <span class="prompt">$ </span><span class="cmd">docker compose up --build</span><br>
+            <span class="comment"># Wait for all services to be healthy (~2 min on first run)</span>
+          </div>
+        </div>
+        <!-- Step 3 -->
+        <div class="setup-step reveal">
+          <div class="setup-step-header">
+            <span class="step-badge">Step 3</span>
+            <span class="step-title">Verify everything works</span>
+          </div>
+          <div class="terminal-block">
+            <span class="comment"># Frontend</span><br>
+            <span class="prompt">$ </span><span class="cmd">open </span><span class="url">http://localhost:3333</span><br><br>
+            <span class="comment"># Product Service API docs</span><br>
+            <span class="prompt">$ </span><span class="cmd">open </span><span class="url">http://localhost:8011/docs</span><br><br>
+            <span class="comment"># User Service API docs</span><br>
+            <span class="prompt">$ </span><span class="cmd">open </span><span class="url">http://localhost:8012/docs</span>
+          </div>
+        </div>
+        <!-- Step 4 -->
+        <div class="setup-step reveal">
+          <div class="setup-step-header">
+            <span class="step-badge">Step 4</span>
+            <span class="step-title">Explore the repo structure</span>
+          </div>
+          <div class="tree-block">
+            <span class="folder">.cursor/rules/</span> <span class="tree-comment">&larr; The 2 workflow files (Cursor rules)</span><br>
+            &nbsp;&nbsp;<span class="file">create-prd.mdc</span><br>
+            &nbsp;&nbsp;<span class="file">generate-tasks.mdc</span><br>
+            <span class="folder">tasks/</span> <span class="tree-comment">&larr; Where PRDs and task lists go</span><br>
+            <span class="folder">backend/</span><br>
+            &nbsp;&nbsp;<span class="folder">product-service/</span> <span class="tree-comment">&larr; Express.js, port 8011</span><br>
+            &nbsp;&nbsp;<span class="folder">user-service/</span> <span class="tree-comment">&larr; Express.js, port 8012</span><br>
+            <span class="folder">frontend/</span> <span class="tree-comment">&larr; Nuxt 3, port 3333</span><br>
+            <span class="file">docker-compose.yml</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 5 — First Task (3.4)
+       ==================================================== -->
+  <section class="slide" id="slide-4">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 3.4</span>
+        <h2>Your First Feature &mdash; Together</h2>
+      </div>
+      <div class="option-paths">
+        <!-- Option A: Cursor -->
+        <div class="option-card option-card--a reveal">
+          <div class="option-label">Option A &mdash; Cursor</div>
+          <ol class="option-steps">
+            <li>Open the repo in Cursor</li>
+            <li>In Agent chat: <code style="white-space:normal;">Use @create-prd.mdc &mdash; I want to add a health check endpoint to the product service</code></li>
+            <li>Answer the clarifying questions</li>
+            <li>Then: <code>Take @prd-health-check.md and create tasks using @generate-tasks.mdc</code></li>
+            <li>Review parent tasks, say "Go"</li>
+            <li>Then: "Start on task 1.1"</li>
+          </ol>
+        </div>
+        <!-- Option B: Claude Code -->
+        <div class="option-card option-card--b reveal">
+          <div class="option-label">Option B &mdash; Claude Code</div>
+          <ol class="option-steps">
+            <li>Open your terminal</li>
+            <li><code>cd marketplace-ai-workshop &amp;&amp; claude</code></li>
+            <li>Then type: <code style="white-space:normal;">Read .cursor/rules/create-prd.mdc, then use it to create a PRD for a health check endpoint</code></li>
+            <li>After the PRD is generated: <code style="white-space:normal;">Read .cursor/rules/generate-tasks.mdc, then use it to create tasks from tasks/prd-health-check.md</code></li>
+            <li>Review parent tasks, say "Go"</li>
+            <li>Then: "Start on task 1.1"</li>
+          </ol>
+        </div>
+      </div>
+      <div class="walkthrough-section reveal">
+        <div class="walkthrough-title">Walk through together:</div>
+        <div class="walkthrough-steps">
+          <div class="walkthrough-step">
+            <div class="walkthrough-step-num">1</div>
+            <div class="walkthrough-step-text">Watch the PRD get generated from a one-line description</div>
+          </div>
+          <div class="walkthrough-step">
+            <div class="walkthrough-step-num">2</div>
+            <div class="walkthrough-step-text">Watch two-phase task generation (parent tasks &rarr; "Go" &rarr; subtasks)</div>
+          </div>
+          <div class="walkthrough-step">
+            <div class="walkthrough-step-num">3</div>
+            <div class="walkthrough-step-text">Watch the AI execute one subtask: read &rarr; test &rarr; implement &rarr; verify</div>
+          </div>
+          <div class="walkthrough-step">
+            <div class="walkthrough-step-num">4</div>
+            <div class="walkthrough-step-text">Review the output together</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 6 — Troubleshooting (3.5)
+       ==================================================== -->
+  <section class="slide" id="slide-5">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 3.5</span>
+        <h2>Common Issues &amp; Fixes</h2>
+      </div>
+      <div class="reveal">
+        <table class="trouble-table">
+          <thead>
+            <tr>
+              <th style="width:35%;">Issue</th>
+              <th>Fix</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="trouble-issue">Docker compose fails</td>
+              <td class="trouble-fix"><code>docker compose down -v &amp;&amp; docker compose up --build</code></td>
+            </tr>
+            <tr>
+              <td class="trouble-issue">Port 3333 in use</td>
+              <td class="trouble-fix"><code>lsof -i :3333</code> then <code>kill &lt;PID&gt;</code></td>
+            </tr>
+            <tr>
+              <td class="trouble-issue">Port 8011/8012 in use</td>
+              <td class="trouble-fix"><code>lsof -i :8011</code> then <code>kill &lt;PID&gt;</code></td>
+            </tr>
+            <tr>
+              <td class="trouble-issue">Frontend shows no products</td>
+              <td class="trouble-fix">Restart: <code>docker compose restart frontend</code></td>
+            </tr>
+            <tr>
+              <td class="trouble-issue">Backend tests fail</td>
+              <td class="trouble-fix"><code>cd backend/product-service &amp;&amp; npm install</code> first</td>
+            </tr>
+            <tr>
+              <td class="trouble-issue">Cursor rules not showing</td>
+              <td class="trouble-fix">Make sure you opened the repo root folder in Cursor</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 7 — Open Exploration (3.6)
+       ==================================================== -->
+  <section class="slide" id="slide-6">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Slide 3.6</span>
+        <h2>Try It Out</h2>
+        <p class="slide-subtitle">Use the remaining time to explore on your own</p>
+      </div>
+      <div class="explore-cards">
+        <div class="explore-card reveal">
+          <div class="explore-card-num">01</div>
+          <div class="explore-card-title">Add a Count Endpoint</div>
+          <div class="explore-card-desc">Use the workflow to add a <code style="font-family:var(--font-mono);font-size:0.82rem;background:rgba(255,255,255,0.06);padding:2px 6px;border-radius:4px;">/products/count</code> endpoint that returns the total number of products.</div>
+        </div>
+        <div class="explore-card reveal">
+          <div class="explore-card-num">02</div>
+          <div class="explore-card-title">Display Seller Name</div>
+          <div class="explore-card-desc">Use the workflow to add a seller name display on the product card in the frontend.</div>
+        </div>
+        <div class="explore-card reveal">
+          <div class="explore-card-num">03</div>
+          <div class="explore-card-title">With vs. Without</div>
+          <div class="explore-card-desc">Try giving a vague instruction WITHOUT the workflow, then try WITH the workflow. Compare the results.</div>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="timing-note">
+          <strong>Timing:</strong> This section is the buffer. If setup took longer than expected, this shrinks. If setup was fast, you get more exploration time. Either way, we end at 12:30 sharp for lunch.
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ====================================================
+       SLIDE 8 — Morning Summary
+       ==================================================== -->
+  <section class="slide" id="slide-7">
+    <div class="slide-inner stagger">
+      <div class="reveal">
+        <span class="slide-number">Morning Wrap-Up</span>
+        <h2>Morning Summary</h2>
+      </div>
+      <div class="reveal">
+        <table class="summary-table">
+          <thead>
+            <tr>
+              <th>Section</th>
+              <th>Time</th>
+              <th>Duration</th>
+              <th>Flexibility</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td class="section-name">1: Why This Works</td>
+              <td class="time-col">9:00&ndash;9:45</td>
+              <td class="duration-col">45 min</td>
+              <td class="flex-col">Can compress to 30 min</td>
+            </tr>
+            <tr>
+              <td class="section-name">2: The Workflow</td>
+              <td class="time-col">9:45&ndash;11:00</td>
+              <td class="duration-col">75 min</td>
+              <td class="flex-col">Strict &mdash; demo needs full time</td>
+            </tr>
+            <tr>
+              <td class="section-name">Break</td>
+              <td class="time-col">11:00&ndash;11:15</td>
+              <td class="duration-col">15 min</td>
+              <td class="flex-col">Strict</td>
+            </tr>
+            <tr>
+              <td class="section-name">3: Setup &amp; Hands-On</td>
+              <td class="time-col">11:15&ndash;12:30</td>
+              <td class="duration-col">75 min</td>
+              <td class="flex-col">Setup varies. Q&amp;A is the buffer</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="check-questions reveal">
+        <div class="check-questions-title">Check Understanding</div>
+        <ul class="check-list stagger">
+          <li class="reveal">"Can someone explain back the difference between copilot-level and code-factory-level usage?"</li>
+          <li class="reveal">"Why does the system pause after parent tasks and wait for 'Go'? What does that prevent?"</li>
+          <li class="reveal">"If task 2.3 fails, what do you do? Walk me through it."</li>
+          <li class="reveal">"What's the first thing the AI did when you invoked create-prd? Why does that matter?"</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- =========================================================
+       JavaScript — SlidePresentation controller
+       ========================================================= -->
+  <script>
+    class SlidePresentation {
+      constructor() {
+        this.slides = document.querySelectorAll('.slide');
+        this.dots = document.querySelectorAll('.nav-dot');
+        this.progressBar = document.getElementById('progressBar');
+        this.currentSlide = 0;
+        this.totalSlides = this.slides.length;
+        this.isScrolling = false;
+        this.touchStartY = 0;
+        this.touchStartX = 0;
+
+        this.init();
+      }
+
+      init() {
+        this.setupIntersectionObserver();
+        this.setupKeyboardNav();
+        this.setupTouchNav();
+        this.setupDotNav();
+        this.updateProgress();
+      }
+
+      /* ----- IntersectionObserver for reveal animations ----- */
+      setupIntersectionObserver() {
+        const revealObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting) {
+                entry.target.classList.add('visible');
+              }
+            });
+          },
+          { threshold: 0.15, rootMargin: '0px 0px -40px 0px' }
+        );
+
+        document.querySelectorAll('.reveal').forEach((el) => {
+          revealObserver.observe(el);
+        });
+
+        /* Slide tracking for nav dots + progress */
+        const slideObserver = new IntersectionObserver(
+          (entries) => {
+            entries.forEach((entry) => {
+              if (entry.isIntersecting && entry.intersectionRatio > 0.4) {
+                const idx = Array.from(this.slides).indexOf(entry.target);
+                if (idx !== -1) {
+                  this.currentSlide = idx;
+                  this.updateDots();
+                  this.updateProgress();
+                }
+              }
+            });
+          },
+          { threshold: 0.5 }
+        );
+
+        this.slides.forEach((s) => slideObserver.observe(s));
+      }
+
+      /* ----- Keyboard navigation ----- */
+      setupKeyboardNav() {
+        document.addEventListener('keydown', (e) => {
+          switch (e.key) {
+            case 'ArrowDown':
+            case 'ArrowRight':
+            case ' ':
+            case 'PageDown':
+              e.preventDefault();
+              this.goToSlide(Math.min(this.currentSlide + 1, this.totalSlides - 1));
+              break;
+            case 'ArrowUp':
+            case 'ArrowLeft':
+            case 'PageUp':
+              e.preventDefault();
+              this.goToSlide(Math.max(this.currentSlide - 1, 0));
+              break;
+            case 'Home':
+              e.preventDefault();
+              this.goToSlide(0);
+              break;
+            case 'End':
+              e.preventDefault();
+              this.goToSlide(this.totalSlides - 1);
+              break;
+          }
+        });
+      }
+
+      /* ----- Touch / Swipe ----- */
+      setupTouchNav() {
+        document.addEventListener('touchstart', (e) => {
+          this.touchStartY = e.changedTouches[0].screenY;
+          this.touchStartX = e.changedTouches[0].screenX;
+        }, { passive: true });
+
+        document.addEventListener('touchend', (e) => {
+          const deltaY = this.touchStartY - e.changedTouches[0].screenY;
+          const deltaX = this.touchStartX - e.changedTouches[0].screenX;
+
+          /* Only respond to primarily vertical swipes */
+          if (Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 50) {
+            if (deltaY > 0) {
+              this.goToSlide(Math.min(this.currentSlide + 1, this.totalSlides - 1));
+            } else {
+              this.goToSlide(Math.max(this.currentSlide - 1, 0));
+            }
+          }
+        }, { passive: true });
+      }
+
+      /* ----- Dot navigation ----- */
+      setupDotNav() {
+        this.dots.forEach((dot) => {
+          dot.addEventListener('click', () => {
+            const idx = parseInt(dot.dataset.slide, 10);
+            this.goToSlide(idx);
+          });
+        });
+      }
+
+      /* ----- Navigation ----- */
+      goToSlide(idx) {
+        if (idx < 0 || idx >= this.totalSlides) return;
+        this.slides[idx].scrollIntoView({ behavior: 'smooth' });
+        this.currentSlide = idx;
+        this.updateDots();
+        this.updateProgress();
+      }
+
+      /* ----- UI Updates ----- */
+      updateDots() {
+        this.dots.forEach((dot, i) => {
+          dot.classList.toggle('active', i === this.currentSlide);
+        });
+      }
+
+      updateProgress() {
+        const pct = this.totalSlides > 1
+          ? (this.currentSlide / (this.totalSlides - 1)) * 100
+          : 0;
+        this.progressBar.style.width = pct + '%';
+      }
+    }
+
+    /* Boot */
+    document.addEventListener('DOMContentLoaded', () => {
+      new SlidePresentation();
+    });
+  </script>
+</body>
+</html>
